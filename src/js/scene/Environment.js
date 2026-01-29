@@ -61,8 +61,8 @@ export class Environment {
     // Create a simple gradient environment
     const envScene = new ThreeScene();
 
-    // Dark blue-purple background matching the design
-    envScene.background = new Color(0x0a0a0f);
+    // Pure black background matching the design
+    envScene.background = new Color(0x000000);
 
     // Generate environment map from scene
     this.envMap = this.pmremGenerator.fromScene(envScene, 0.04).texture;

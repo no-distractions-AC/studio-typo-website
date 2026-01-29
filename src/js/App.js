@@ -169,7 +169,7 @@ export class App {
     // Initialize navigation
     this.navigation = new Navigation(
       document.getElementById("navigation"),
-      document.getElementById("content"),
+      document.getElementById("controls"),
       (section) => {
         analytics.trackNavigation(section);
       },

@@ -10,7 +10,7 @@ export const CONFIG = {
       fov: 45,
       near: 0.1,
       far: 100,
-      position: { x: 0, y: 2, z: 8 },
+      position: { x: -2, y: 6, z: 2.5 },
     },
     renderer: {
       antialias: true,

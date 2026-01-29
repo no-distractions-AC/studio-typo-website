@@ -32,8 +32,8 @@
         -webkit-font-smoothing: antialiased;
       }
       body {
-        background: #0a0a0f;
-        color: #f4f4f5;
+        background: #000000;
+        color: #ffffff;
         min-height: 100vh;
         min-height: 100dvh;
         overflow: hidden;
@@ -51,26 +51,26 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: #0a0a0f;
+        background: #000000;
         z-index: 100;
         gap: 1rem;
       }
       .loading-text {
         font-size: 0.875rem;
-        color: #a1a1aa;
+        color: #888888;
         letter-spacing: 0.1em;
         text-transform: uppercase;
       }
       .loading-progress {
         width: 120px;
         height: 2px;
-        background: #2a2a3a;
+        background: #333333;
         border-radius: 9999px;
         overflow: hidden;
       }
       .loading-progress-bar {
         height: 100%;
-        background: #0080fe;
+        background: #ffffff;
         width: 0%;
         transition: width 0.3s ease-out;
       }
@@ -82,8 +82,8 @@
         top: -100%;
         left: 1rem;
         padding: 0.5rem 1rem;
-        background: #0080fe;
-        color: #f4f4f5;
+        background: #ffffff;
+        color: #000000;
         border-radius: 4px;
         z-index: 9999;
       }
@@ -224,139 +224,51 @@
     <!-- 3D Canvas -->
     <canvas id="canvas" aria-label="Interactive 3D keyboard scene"></canvas>
 
-    <!-- Navigation (initially hidden) -->
-    <nav id="navigation" class="sidebar hidden" aria-label="Main navigation">
-      <ul class="nav-list" role="menubar">
-        <li role="none">
-          <a
-            href="#services"
-            class="nav-item active"
-            role="menuitem"
-            aria-current="page"
-            >Services</a
-          >
-        </li>
-        <li role="none">
-          <a href="#about" class="nav-item" role="menuitem">About</a>
-        </li>
-        <li role="none">
-          <a href="#work" class="nav-item" role="menuitem">Work</a>
-        </li>
-        <li role="none">
-          <a href="#contact" class="nav-item" role="menuitem">Contact</a>
-        </li>
-      </ul>
-
-      <div class="sidebar-controls">
-        <button
-          id="theme-toggle"
-          class="toggle-btn theme-toggle"
-          aria-label="Toggle theme"
-          aria-pressed="false"
-          title="Toggle dark/light theme"
-        ></button>
-        <button
-          id="sound-toggle"
-          class="toggle-btn sound-toggle"
-          aria-label="Toggle sound"
-          aria-pressed="true"
-          title="Toggle sound effects"
-        ></button>
+    <!-- Navigation - Minimal (initially hidden) -->
+    <div
+      id="navigation"
+      class="nav-minimal hidden"
+      aria-label="Main navigation"
+    >
+      <div class="nav-section">
+        <span class="nav-label">Services</span>
+        <a href="#" class="nav-link" data-section="services"
+          >Web, Mobile, Design, Consulting</a
+        >
       </div>
-    </nav>
+      <div class="nav-section">
+        <span class="nav-label">About</span>
+        <a href="#" class="nav-link" data-section="about">Studio Typo</a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Work</span>
+        <a href="#" class="nav-link" data-section="work">Selected Projects</a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Contact</span>
+        <a href="#" class="nav-link" data-section="contact"
+          >Email, Twitter, LinkedIn</a
+        >
+      </div>
+    </div>
 
-    <!-- Content Sections (initially hidden) -->
-    <main id="content" class="content hidden">
-      <section
-        id="services"
-        class="section active"
-        aria-labelledby="services-heading"
-      >
-        <h2 id="services-heading">Services</h2>
-        <p>
-          We build exceptional digital experiences that drive business growth.
-          Our team combines technical excellence with thoughtful design to
-          deliver solutions that make an impact.
-        </p>
-        <ul class="services-list">
-          <li>Web Application Development</li>
-          <li>Mobile App Development</li>
-          <li>UI/UX Design</li>
-          <li>Technical Consulting</li>
-          <li>Cloud Architecture</li>
-          <li>Performance Optimization</li>
-        </ul>
-      </section>
-
-      <section id="about" class="section" aria-labelledby="about-heading">
-        <h2 id="about-heading">About</h2>
-        <p>
-          Studio Typo is a premium technology consultancy founded on the belief
-          that great software requires both technical excellence and thoughtful
-          design.
-        </p>
-        <p>
-          Our team brings decades of combined experience building products for
-          startups and Fortune 500 companies alike. We approach every project
-          with the same attention to detail and commitment to quality.
-        </p>
-        <p>
-          Based in San Francisco, we work with clients globally to turn ideas
-          into reality. Our process is collaborative, transparent, and focused
-          on delivering results that exceed expectations.
-        </p>
-      </section>
-
-      <section id="work" class="section" aria-labelledby="work-heading">
-        <h2 id="work-heading">Work</h2>
-        <p>Selected projects showcasing our expertise across industries.</p>
-        <div class="work-grid">
-          <article class="work-item">
-            <h3>Project Alpha</h3>
-            <p>
-              Enterprise SaaS platform serving 100k+ users. Built with modern
-              architecture for scalability and performance.
-            </p>
-          </article>
-          <article class="work-item">
-            <h3>Project Beta</h3>
-            <p>
-              Mobile-first e-commerce experience with 40% increase in conversion
-              rate and seamless checkout flow.
-            </p>
-          </article>
-          <article class="work-item">
-            <h3>Project Gamma</h3>
-            <p>
-              Real-time collaboration tool for distributed teams.
-              WebSocket-based architecture for instant updates.
-            </p>
-          </article>
-          <article class="work-item">
-            <h3>Project Delta</h3>
-            <p>
-              Data visualization dashboard transforming complex analytics into
-              actionable insights.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section id="contact" class="section" aria-labelledby="contact-heading">
-        <h2 id="contact-heading">Contact</h2>
-        <p>Ready to build something great? Let's talk about your project.</p>
-        <p>
-          Email:
-          <a href="mailto:hello@studiotypo.com" class="contact-link"
-            >hello@studiotypo.com</a
-          >
-        </p>
-        <p>
-          We typically respond within 24 hours. For urgent inquiries, please
-          include "URGENT" in your subject line.
-        </p>
-      </section>
-    </main>
+    <!-- Toggle controls (bottom-right) -->
+    <div id="controls" class="controls-fixed hidden">
+      <button
+        id="theme-toggle"
+        class="toggle-btn theme-toggle"
+        aria-label="Toggle theme"
+        aria-pressed="false"
+        title="Toggle dark/light theme"
+      ></button>
+      <button
+        id="sound-toggle"
+        class="toggle-btn sound-toggle"
+        aria-label="Toggle sound"
+        aria-pressed="true"
+        title="Toggle sound effects"
+      ></button>
+    </div>
 
     <!-- Interaction Hint (READY state) -->
     <div id="hint" class="hint hidden" aria-live="polite">

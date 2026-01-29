@@ -5,55 +5,28 @@
 
 /* Mobile: < 768px */
 @media (max-width: 767px) {
-  /* Canvas adjustments for mobile */
-  #canvas {
-    height: calc(100vh - 64px);
-    height: calc(100dvh - 64px); /* Account for mobile bottom nav */
+  /* Minimal nav adjustments for mobile */
+  .nav-minimal {
+    top: 40px;
+    left: 40px;
   }
 
-  /* Sidebar becomes bottom sheet on mobile */
-  .sidebar {
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: auto;
-    max-height: 60vh;
-    border-right: none;
-    border-top: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: var(--space-4);
-    transform: translateY(100%);
-    flex-direction: column-reverse;
+  .nav-section {
+    margin-bottom: var(--space-4);
   }
 
-  .sidebar.visible {
-    transform: translateY(0);
-  }
-
-  .nav-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-2);
-  }
-
-  .nav-item {
-    padding: var(--space-2) var(--space-3);
+  .nav-label {
     font-size: var(--text-xs);
   }
 
-  .sidebar-controls {
-    justify-content: center;
-    margin-bottom: var(--space-3);
+  .nav-link {
+    font-size: var(--text-xs);
   }
 
-  /* Content adjustments */
-  .content {
-    left: 0;
-    padding: var(--space-6) var(--space-4);
-    padding-bottom: calc(var(--space-6) + 200px); /* Space for bottom nav */
+  /* Controls adjustments */
+  .controls-fixed {
+    bottom: 16px;
+    right: 16px;
   }
 
   /* Typography scaling */
@@ -73,56 +46,46 @@
   .hint {
     bottom: var(--space-16);
   }
+}
 
-  /* Work grid single column */
-  .work-grid {
-    grid-template-columns: 1fr;
+/* Small mobile: < 480px */
+@media (max-width: 479px) {
+  .nav-minimal {
+    top: 24px;
+    left: 24px;
+  }
+
+  .nav-section {
+    margin-bottom: var(--space-3);
   }
 }
 
 /* Tablet: 768px - 1023px */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .sidebar {
-    width: 220px;
-    padding: var(--space-6);
-  }
-
-  .content {
-    left: 220px;
-    padding: var(--space-12) var(--space-8);
-  }
-
-  .nav-item {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-xs);
-  }
-}
-
-/* Desktop: 1024px - 1439px */
-@media (min-width: 1024px) and (max-width: 1439px) {
-  .sidebar {
-    width: 260px;
-  }
-
-  .content {
-    left: 260px;
-    padding: var(--space-12) var(--space-10);
+  .nav-minimal {
+    top: 48px;
+    left: 48px;
   }
 }
 
 /* Large Desktop: >= 1440px */
 @media (min-width: 1440px) {
-  .content {
-    padding: var(--space-16) var(--space-16);
-    max-width: 1200px;
+  .nav-minimal {
+    top: 80px;
+    left: 80px;
+  }
+
+  .controls-fixed {
+    bottom: 32px;
+    right: 32px;
   }
 }
 
 /* Touch devices - larger tap targets */
 @media (pointer: coarse) {
-  .nav-item {
+  .nav-link {
     min-height: 44px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
   }
 
@@ -139,36 +102,26 @@
     --border-secondary: #777;
   }
 
-  .nav-item.active {
-    border: 2px solid var(--accent);
+  .nav-link {
+    text-decoration-thickness: 2px;
   }
 }
 
 /* Print styles */
 @media print {
-  .sidebar,
+  .nav-minimal,
+  .controls-fixed,
   #canvas,
   .hint,
   .loading {
     display: none !important;
   }
-
-  .content {
-    position: static;
-    padding: 0;
-  }
-
-  .section {
-    display: block !important;
-    page-break-inside: avoid;
-    margin-bottom: 2rem;
-  }
 }
 
 /* Landscape mobile */
 @media (max-width: 767px) and (orientation: landscape) {
-  .sidebar {
-    max-height: 50vh;
+  .nav-minimal {
+    top: 24px;
   }
 
   #canvas {
@@ -179,15 +132,12 @@
 
 /* Safe area insets for notched devices */
 @supports (padding: env(safe-area-inset-bottom)) {
-  .sidebar {
-    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  .controls-fixed {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: calc(24px + env(safe-area-inset-right));
   }
 
-  @media (max-width: 767px) {
-    .content {
-      padding-bottom: calc(
-        var(--space-6) + 200px + env(safe-area-inset-bottom)
-      );
-    }
+  .nav-minimal {
+    left: calc(60px + env(safe-area-inset-left));
   }
 }

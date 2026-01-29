@@ -39,9 +39,9 @@ export class KeyModel {
     // Key cap geometry - slightly tapered for realism
     const geometry = new BoxGeometry(1, 0.4, 1);
 
-    // PBR material
+    // PBR material - darker for better contrast on black bg
     const material = new MeshStandardMaterial({
-      color: 0x2a2a35,
+      color: 0x1a1a1f,
       metalness: 0.8,
       roughness: 0.3,
       transparent: !this.isTypoKey,
@@ -77,27 +77,27 @@ export class KeyModel {
    */
   applyLetterTexture() {
     const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 256;
+    canvas.height = 256;
     const ctx = canvas.getContext("2d");
 
     // Background matching key color
-    ctx.fillStyle = "#2A2A35";
-    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = "#1a1a1f";
+    ctx.fillRect(0, 0, 256, 256);
 
     // Subtle gradient for depth
-    const gradient = ctx.createLinearGradient(0, 0, 0, 128);
-    gradient.addColorStop(0, "rgba(255, 255, 255, 0.05)");
-    gradient.addColorStop(1, "rgba(0, 0, 0, 0.1)");
+    const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.03)");
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillRect(0, 0, 256, 256);
 
-    // Letter
-    ctx.fillStyle = "#F4F4F5";
-    ctx.font = 'bold 56px "Space Mono", monospace';
+    // Letter - larger and brighter for readability
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = 'bold 112px "Space Mono", monospace';
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(this.letter, 64, 64);
+    ctx.fillText(this.letter, 128, 128);
 
     const texture = new CanvasTexture(canvas);
     this.mesh.material.map = texture;
