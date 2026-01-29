@@ -10,7 +10,7 @@ export const CONFIG = {
       fov: 45,
       near: 0.1,
       far: 100,
-      position: { x: -2, y: 6, z: 2.5 },
+      position: { x: 0, y: 8, z: 0 },
     },
     renderer: {
       antialias: true,
@@ -89,7 +89,7 @@ export const CONFIG = {
 
   // Theme
   theme: {
-    default: "dark",
+    default: "light",
     storageKey: "studio-typo-theme",
   },
 

@@ -149,10 +149,13 @@ export class App {
     const savedTheme = getTheme(CONFIG.theme.default);
     document.documentElement.setAttribute("data-theme", savedTheme);
 
-    // Initialize theme toggle
+    // Initialize theme toggle with callback to update 3D keys
     this.themeToggle = new ThemeToggle(
       document.getElementById("theme-toggle"),
       savedTheme,
+      (isDark) => {
+        this.keyboardLayout?.updateTheme(isDark);
+      },
     );
 
     // Initialize sound toggle

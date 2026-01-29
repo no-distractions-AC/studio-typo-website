@@ -1,5 +1,5 @@
 /**
- * KeyModel - Individual 3D keyboard key with shimmer effect
+ * KeyModel - Individual 3D keyboard key with theme-aware colors
  */
 
 import {
@@ -30,18 +30,25 @@ export class KeyModel {
 
     // Random phase offset for shimmer animation
     this.shimmerOffset = Math.random() * Math.PI * 2;
+
+    // Theme state
+    this.isDarkTheme =
+      document.documentElement.getAttribute("data-theme") === "dark";
   }
 
   /**
    * Create the key mesh
    */
   create() {
-    // Key cap geometry - slightly tapered for realism
+    // Key cap geometry
     const geometry = new BoxGeometry(1, 0.4, 1);
 
-    // PBR material - darker for better contrast on black bg
+    // Get theme-aware colors
+    const keyColor = this.isDarkTheme ? 0xffffff : 0x1a1a1f;
+
+    // PBR material
     const material = new MeshStandardMaterial({
-      color: 0x1a1a1f,
+      color: keyColor,
       metalness: 0.8,
       roughness: 0.3,
       transparent: !this.isTypoKey,
@@ -81,27 +88,56 @@ export class KeyModel {
     canvas.height = 256;
     const ctx = canvas.getContext("2d");
 
+    // Theme-aware colors
+    const bgColor = this.isDarkTheme ? "#ffffff" : "#1a1a1f";
+    const textColor = this.isDarkTheme ? "#000000" : "#FFFFFF";
+
     // Background matching key color
-    ctx.fillStyle = "#1a1a1f";
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, 256, 256);
 
     // Subtle gradient for depth
     const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-    gradient.addColorStop(0, "rgba(255, 255, 255, 0.03)");
-    gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
+    if (this.isDarkTheme) {
+      gradient.addColorStop(0, "rgba(0, 0, 0, 0.03)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
+    } else {
+      gradient.addColorStop(0, "rgba(255, 255, 255, 0.03)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
+    }
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 256, 256);
 
-    // Letter - larger and brighter for readability
-    ctx.fillStyle = "#FFFFFF";
+    // Letter - opposite color for contrast
+    ctx.fillStyle = textColor;
     ctx.font = 'bold 112px "Space Mono", monospace';
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(this.letter, 128, 128);
 
     const texture = new CanvasTexture(canvas);
+
+    // Dispose old texture if exists
+    if (this.mesh.material.map) {
+      this.mesh.material.map.dispose();
+    }
+
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
+  }
+
+  /**
+   * Update theme colors
+   */
+  updateTheme(isDark) {
+    this.isDarkTheme = isDark;
+
+    // Update material color
+    const keyColor = isDark ? 0xffffff : 0x1a1a1f;
+    this.mesh.material.color.setHex(keyColor);
+
+    // Update texture with new colors
+    this.applyLetterTexture();
   }
 
   /**

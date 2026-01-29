@@ -1,5 +1,5 @@
 /**
- * AudioManager - Web Audio API sound system with Topre/Membrane sounds
+ * AudioManager - Web Audio API sound system with Cherry MX Blue modal synthesis
  */
 
 import { CONFIG } from "../../config.js";
@@ -11,6 +11,7 @@ export class AudioManager {
     this.typingLoopSource = null;
     this.typingLoopBuffer = null;
     this.keyPressBuffer = null;
+    this.brownNoiseBuffer = null;
     this.enabled = true;
     this.initialized = false;
     this.typingLoopTimeout = null;
@@ -33,6 +34,9 @@ export class AudioManager {
         await this.context.resume();
       }
 
+      // Generate brown noise buffer for modal synthesis
+      this.brownNoiseBuffer = this.createBrownNoiseBuffer();
+
       this.initialized = true;
 
       // Try to load audio files (will fall back to synthetic if not found)
@@ -41,6 +45,25 @@ export class AudioManager {
       console.error("Failed to initialize audio:", error);
       this.enabled = false;
     }
+  }
+
+  /**
+   * Create brown noise buffer for modal synthesis
+   */
+  createBrownNoiseBuffer() {
+    const sampleRate = this.context.sampleRate;
+    const length = Math.floor(sampleRate * 0.05);
+    const buffer = this.context.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    let lastOut = 0;
+    for (let i = 0; i < length; i++) {
+      const white = Math.random() * 2 - 1;
+      lastOut = (lastOut + 0.02 * white) / 1.02;
+      data[i] = lastOut * 3.5;
+    }
+
+    return buffer;
   }
 
   /**
@@ -137,7 +160,7 @@ export class AudioManager {
     if (this.keyPressBuffer) {
       this.playBuffer(this.keyPressBuffer);
     } else {
-      this.createSyntheticTopreSound();
+      this.playModalKeypress();
     }
   }
 
@@ -166,110 +189,102 @@ export class AudioManager {
   }
 
   /**
-   * Create synthetic Topre/Membrane sound
-   * Thocky, deeper, muted character
+   * Play Cherry MX Blue modal synthesis keypress
+   * 3 events: click mechanism, bottom-out impact, upstroke return
    */
-  createSyntheticTopreSound() {
-    if (!this.context) return;
+  playModalKeypress() {
+    if (!this.context || !this.brownNoiseBuffer) return;
 
-    // === Layer 1: Deep thock ===
-    const osc1 = this.context.createOscillator();
-    const gain1 = this.context.createGain();
-    const filter = this.context.createBiquadFilter();
+    const t = this.context.currentTime;
 
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(
-      150 + Math.random() * 30,
-      this.context.currentTime,
-    );
-    osc1.frequency.exponentialRampToValueAtTime(
-      60,
-      this.context.currentTime + 0.08,
-    );
+    // Event 1: Click mechanism (t + 0ms)
+    this.triggerModalImpact(t, {
+      duration: 0.002,
+      modes: [
+        { freq: 1100 * this.rand(0.97, 1.03), Q: 8, gain: 0.5 },
+        { freq: 2200 * this.rand(0.97, 1.03), Q: 5, gain: 0.25 },
+        { freq: 3800 * this.rand(0.97, 1.03), Q: 3, gain: 0.1 },
+      ],
+      masterGain: 0.4,
+    });
 
-    // Low-pass filter for muted sound
-    filter.type = "lowpass";
-    filter.frequency.value = 800;
-    filter.Q.value = 1;
+    // Event 2: Bottom-out impact (t + 1.5ms) - the main "thock"
+    this.triggerModalImpact(t + 0.0015, {
+      duration: 0.004,
+      modes: [
+        { freq: 160 * this.rand(0.95, 1.05), Q: 28, gain: 0.7 },
+        { freq: 280 * this.rand(0.95, 1.05), Q: 22, gain: 0.5 },
+        { freq: 520 * this.rand(0.97, 1.03), Q: 18, gain: 1.0 },
+        { freq: 780 * this.rand(0.97, 1.03), Q: 14, gain: 0.6 },
+        { freq: 1150 * this.rand(0.97, 1.03), Q: 10, gain: 0.35 },
+        { freq: 1800 * this.rand(0.97, 1.03), Q: 6, gain: 0.2 },
+        { freq: 2900 * this.rand(0.97, 1.03), Q: 4, gain: 0.1 },
+      ],
+      masterGain: 0.8,
+    });
 
-    // Quick attack, medium decay (thock)
-    gain1.gain.setValueAtTime(0, this.context.currentTime);
-    gain1.gain.linearRampToValueAtTime(0.35, this.context.currentTime + 0.005);
-    gain1.gain.exponentialRampToValueAtTime(
-      0.01,
-      this.context.currentTime + 0.15,
-    );
-
-    osc1.connect(filter);
-    filter.connect(gain1);
-    gain1.connect(this.masterGain);
-
-    osc1.start();
-    osc1.stop(this.context.currentTime + 0.15);
-
-    // === Layer 2: Subtle click ===
-    const osc2 = this.context.createOscillator();
-    const gain2 = this.context.createGain();
-
-    osc2.type = "square";
-    osc2.frequency.setValueAtTime(2000, this.context.currentTime);
-    osc2.frequency.exponentialRampToValueAtTime(
-      500,
-      this.context.currentTime + 0.02,
-    );
-
-    gain2.gain.setValueAtTime(0.04, this.context.currentTime);
-    gain2.gain.exponentialRampToValueAtTime(
-      0.001,
-      this.context.currentTime + 0.03,
-    );
-
-    osc2.connect(gain2);
-    gain2.connect(this.masterGain);
-
-    osc2.start();
-    osc2.stop(this.context.currentTime + 0.03);
-
-    // === Layer 3: Subtle rubber dome sound ===
-    const noise = this.createNoiseBuffer(0.05);
-    const noiseSource = this.context.createBufferSource();
-    const noiseGain = this.context.createGain();
-    const noiseFilter = this.context.createBiquadFilter();
-
-    noiseSource.buffer = noise;
-
-    noiseFilter.type = "bandpass";
-    noiseFilter.frequency.value = 500;
-    noiseFilter.Q.value = 2;
-
-    noiseGain.gain.setValueAtTime(0.02, this.context.currentTime);
-    noiseGain.gain.exponentialRampToValueAtTime(
-      0.001,
-      this.context.currentTime + 0.05,
-    );
-
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(this.masterGain);
-
-    noiseSource.start();
-    noiseSource.stop(this.context.currentTime + 0.05);
+    // Event 3: Upstroke return (t + 55ms)
+    this.triggerModalImpact(t + 0.055, {
+      duration: 0.0015,
+      modes: [
+        { freq: 1250 * this.rand(0.97, 1.03), Q: 7, gain: 0.3 },
+        { freq: 2000 * this.rand(0.97, 1.03), Q: 5, gain: 0.15 },
+        { freq: 200 * this.rand(0.95, 1.05), Q: 15, gain: 0.2 },
+      ],
+      masterGain: 0.25,
+    });
   }
 
   /**
-   * Create noise buffer for sound texturing
+   * Trigger a modal impact with bandpass filter bank
    */
-  createNoiseBuffer(duration) {
-    const sampleRate = this.context.sampleRate;
-    const length = sampleRate * duration;
-    const buffer = this.context.createBuffer(1, length, sampleRate);
-    const data = buffer.getChannelData(0);
+  triggerModalImpact(startTime, config) {
+    const ctx = this.context;
 
-    for (let i = 0; i < length; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
+    // Create noise exciter
+    const exciter = ctx.createBufferSource();
+    exciter.buffer = this.brownNoiseBuffer;
 
-    return buffer;
+    // Exciter envelope
+    const exciterGain = ctx.createGain();
+    exciterGain.gain.setValueAtTime(0.001, startTime);
+    exciterGain.gain.linearRampToValueAtTime(1.0, startTime + 0.0001);
+    exciterGain.gain.exponentialRampToValueAtTime(
+      0.001,
+      startTime + config.duration,
+    );
+
+    exciter.connect(exciterGain);
+
+    // Master gain for this impact
+    const impactGain = ctx.createGain();
+    impactGain.gain.value = config.masterGain * CONFIG.audio.keyPressVolume;
+    impactGain.connect(this.masterGain);
+
+    // Create bandpass filter for each mode
+    config.modes.forEach((mode) => {
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = mode.freq;
+      filter.Q.value = mode.Q;
+
+      const modeGain = ctx.createGain();
+      modeGain.gain.value = mode.gain * this.rand(0.85, 1.15);
+
+      exciterGain.connect(filter);
+      filter.connect(modeGain);
+      modeGain.connect(impactGain);
+    });
+
+    exciter.start(startTime);
+    exciter.stop(startTime + config.duration + 0.15);
+  }
+
+  /**
+   * Random value in range for natural variation
+   */
+  rand(min, max) {
+    return min + Math.random() * (max - min);
   }
 
   /**
@@ -282,7 +297,7 @@ export class AudioManager {
         return;
       }
 
-      this.createSyntheticTopreSound();
+      this.playModalKeypress();
 
       // Random interval for natural typing rhythm
       const nextDelay = 100 + Math.random() * 150;

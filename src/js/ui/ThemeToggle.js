@@ -6,9 +6,10 @@ import { setTheme } from "../utils/storage.js";
 import { analytics } from "../utils/analytics.js";
 
 export class ThemeToggle {
-  constructor(buttonElement, initialTheme = "dark") {
+  constructor(buttonElement, initialTheme = "dark", onThemeChange = null) {
     this.button = buttonElement;
     this.currentTheme = initialTheme;
+    this.onThemeChange = onThemeChange;
 
     this.init();
   }
@@ -58,6 +59,9 @@ export class ThemeToggle {
 
     // Update button
     this.updateButton();
+
+    // Notify listener
+    this.onThemeChange?.(theme === "dark");
 
     // Track
     analytics.trackThemeToggle(theme);

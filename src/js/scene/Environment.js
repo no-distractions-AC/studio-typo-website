@@ -58,11 +58,11 @@ export class Environment {
    * Create procedural fallback environment
    */
   createFallbackEnv() {
-    // Create a simple gradient environment
+    // Create a simple environment for lighting
     const envScene = new ThreeScene();
 
-    // Pure black background matching the design
-    envScene.background = new Color(0x000000);
+    // No background - let page background show through (canvas has alpha)
+    envScene.background = null;
 
     // Generate environment map from scene
     this.envMap = this.pmremGenerator.fromScene(envScene, 0.04).texture;

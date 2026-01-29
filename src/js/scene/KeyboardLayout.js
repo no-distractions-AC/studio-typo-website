@@ -76,6 +76,15 @@ export class KeyboardLayout {
   }
 
   /**
+   * Update theme colors on all keys
+   */
+  updateTheme(isDark) {
+    for (const key of this.allKeys) {
+      key.updateTheme(isDark);
+    }
+  }
+
+  /**
    * Reveal STUDIO keys in sequence
    */
   async revealStudioKeys() {
