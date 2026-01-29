@@ -298,7 +298,13 @@ export class App {
     }
 
     analytics.trackIntroTriggered("click", keyLetter);
-    this.introSequence.play(keyLetter);
+
+    // Skip intro animation for users who prefer reduced motion
+    if (prefersReducedMotion()) {
+      this.introSequence.skip();
+    } else {
+      this.introSequence.play(keyLetter);
+    }
   }
 
   /**

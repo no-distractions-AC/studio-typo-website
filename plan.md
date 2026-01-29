@@ -1239,14 +1239,14 @@ export class Environment {
 
 ### Deliverables - Phase 2:
 
-- [ ] SceneManager with tree-shaken imports
-- [ ] Debounced resize handler
-- [ ] Visibility change pause/resume
-- [ ] WebGL context loss handling
-- [ ] KeyModel with shimmer idle animation
-- [ ] Canvas texture for key letters
-- [ ] Environment with HDR loading + fallback
-- [ ] Proper disposal of all resources
+- [x] SceneManager with tree-shaken imports
+- [x] Debounced resize handler
+- [x] Visibility change pause/resume
+- [x] WebGL context loss handling
+- [x] KeyModel with shimmer idle animation
+- [x] Canvas texture for key letters
+- [x] Environment with HDR loading + fallback
+- [x] Proper disposal of all resources
 
 ---
 
@@ -1508,11 +1508,11 @@ export class IntroSequence {
 
 ### Deliverables - Phase 3:
 
-- [ ] App.js with state re-entry prevention
-- [ ] Valid transition enforcement
-- [ ] Corrected easing functions matching CSS cubic-bezier
-- [ ] IntroSequence with fade-in-place for STUDIO keys
-- [ ] Proper timing coordination from config
+- [x] App.js with state re-entry prevention
+- [x] Valid transition enforcement
+- [x] Corrected easing functions matching CSS cubic-bezier
+- [x] IntroSequence with fade-in-place for STUDIO keys
+- [x] Proper timing coordination from config
 
 ---
 
@@ -1773,11 +1773,11 @@ export class AudioManager {
 
 ### Deliverables - Phase 4:
 
-- [ ] AudioManager with error handling
-- [ ] Try/catch for audio loading failures
-- [ ] Topre/Membrane style synthetic sounds
-- [ ] Proper typing loop cleanup on disable
-- [ ] Sound toggle with persistence
+- [x] AudioManager with error handling
+- [x] Try/catch for audio loading failures
+- [x] Topre/Membrane style synthetic sounds
+- [x] Proper typing loop cleanup on disable
+- [x] Sound toggle with persistence
 
 ---
 
