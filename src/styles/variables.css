@@ -1,6 +1,10 @@
 /**
  * CSS Variables - Design System
  * Dark theme (default) and Light theme
+ *
+ * IMPORTANT: Keep color values in sync with src/tokens/colors.js
+ * The tokens file is the source of truth for Three.js (JS) colors.
+ * When updating colors, update both this file and the tokens.
  */
 
 /* Dark Theme (Default) - High Contrast Black/White */

@@ -12,6 +12,7 @@ import {
 } from "three";
 import { animate, easings } from "../utils/easing.js";
 import { CONFIG } from "../../config.js";
+import { getThreeColors, getTheme } from "../../tokens/index.js";
 
 export class KeyModel {
   constructor(letter, position, isTypoKey = false) {
@@ -43,8 +44,9 @@ export class KeyModel {
     // Key cap geometry
     const geometry = new BoxGeometry(1, 0.4, 1);
 
-    // Get theme-aware colors
-    const keyColor = this.isDarkTheme ? 0xffffff : 0x1a1a1f;
+    // Get theme-aware colors from tokens
+    const colors = getThreeColors(this.isDarkTheme);
+    const keyColor = colors.keySurface;
 
     // PBR material - lower metalness to show texture clearly
     const material = new MeshStandardMaterial({
@@ -88,9 +90,10 @@ export class KeyModel {
     canvas.height = 256;
     const ctx = canvas.getContext("2d");
 
-    // Theme-aware colors
-    const bgColor = this.isDarkTheme ? "#ffffff" : "#1a1a1f";
-    const textColor = this.isDarkTheme ? "#000000" : "#FFFFFF";
+    // Get theme colors from tokens
+    const theme = getTheme(this.isDarkTheme);
+    const bgColor = theme.key.surface;
+    const textColor = theme.key.text;
 
     // Background matching key color
     ctx.fillStyle = bgColor;
@@ -98,13 +101,8 @@ export class KeyModel {
 
     // Subtle gradient for depth
     const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-    if (this.isDarkTheme) {
-      gradient.addColorStop(0, "rgba(0, 0, 0, 0.03)");
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
-    } else {
-      gradient.addColorStop(0, "rgba(255, 255, 255, 0.03)");
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
-    }
+    gradient.addColorStop(0, theme.gradient.start);
+    gradient.addColorStop(1, theme.gradient.end);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 256, 256);
 
@@ -141,9 +139,9 @@ export class KeyModel {
   updateTheme(isDark) {
     this.isDarkTheme = isDark;
 
-    // Update material color
-    const keyColor = isDark ? 0xffffff : 0x1a1a1f;
-    this.mesh.material.color.setHex(keyColor);
+    // Update material color from tokens
+    const colors = getThreeColors(isDark);
+    this.mesh.material.color.setHex(colors.keySurface);
 
     // Update texture with new colors
     this.applyLetterTexture();
@@ -153,11 +151,14 @@ export class KeyModel {
    * Create shimmer edge highlight effect
    */
   createShimmerEdge() {
+    // Get shimmer color from tokens
+    const colors = getThreeColors(this.isDarkTheme);
+
     // Slightly larger box for edge highlight
     const edgeGeometry = new BoxGeometry(1.05, 0.42, 1.05);
     const edgeMaterial = new MeshStandardMaterial({
-      color: 0x0080fe,
-      emissive: new Color(0x0080fe),
+      color: colors.shimmer,
+      emissive: new Color(colors.shimmer),
       emissiveIntensity: 0,
       transparent: true,
       opacity: 0,
