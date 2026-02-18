@@ -94,7 +94,7 @@ export class TypewriterArt extends AsciiArt {
           this.isCompleted = true;
           this.cursor?.classList.remove("typing");
           this.cursor?.classList.add("done");
-          
+
           // Start reveal timer
           if (!this.revealStartTime) {
             this.revealStartTime = performance.now();

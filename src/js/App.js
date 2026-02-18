@@ -11,9 +11,6 @@ import { Navigation } from "./ui/Navigation.js";
 import { ThemeToggle } from "./ui/ThemeToggle.js";
 import { SoundToggle } from "./ui/SoundToggle.js";
 import { PageTransition } from "./ui/PageTransition.js";
-import { initAsciiDemo } from "./ascii/AsciiDemo.js";
-import { initAllEffects } from "./effects/index.js";
-import { initAllExperiments } from "./ascii/experiments/index.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -306,12 +303,6 @@ export class App {
         // Show navigation and heading
         this.navigation.show();
         document.getElementById("site-heading").classList.add("visible");
-        // Initialize ASCII art demos
-        initAsciiDemo();
-        // Initialize creative effects
-        initAllEffects();
-        // Initialize ASCII experiments v2
-        initAllExperiments();
         break;
     }
   }

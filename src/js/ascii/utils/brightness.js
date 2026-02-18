@@ -124,14 +124,16 @@ export function sampleCanvasWithColor(canvas, cols, rows, gamma = 1.0) {
   for (let y = 0; y < rows; y++) {
     const brightnessRow = [];
     const colorRow = [];
-    
+
     for (let x = 0; x < cols; x++) {
       const startX = Math.floor(x * cellWidth);
       const startY = Math.floor(y * cellHeight);
       const endX = Math.floor((x + 1) * cellWidth);
       const endY = Math.floor((y + 1) * cellHeight);
 
-      let totalR = 0, totalG = 0, totalB = 0;
+      let totalR = 0,
+        totalG = 0,
+        totalB = 0;
       let totalBrightness = 0;
       let sampleCount = 0;
 
@@ -157,15 +159,15 @@ export function sampleCanvasWithColor(canvas, cols, rows, gamma = 1.0) {
       }
 
       let brightness = totalBrightness / sampleCount;
-      
+
       // Apply gamma correction for better mid-tone preservation
       if (gamma !== 1.0) {
         brightness = Math.pow(brightness / 255, 1 / gamma) * 255;
       }
-      
+
       brightness = Math.round(brightness);
       brightnessRow.push(brightness);
-      
+
       colorRow.push({
         r: Math.round(totalR / sampleCount),
         g: Math.round(totalG / sampleCount),
@@ -185,7 +187,7 @@ export function sampleCanvasWithColor(canvas, cols, rows, gamma = 1.0) {
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         brightnessGrid[y][x] = Math.round(
-          ((brightnessGrid[y][x] - minBrightness) / range) * 255
+          ((brightnessGrid[y][x] - minBrightness) / range) * 255,
         );
       }
     }

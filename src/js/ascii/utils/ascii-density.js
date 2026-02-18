@@ -14,23 +14,30 @@ const SIMPLE_RAMP = " .:-=+*#%@";
 const BLOCK_RAMP = " ░▒▓█";
 
 // Extended ramp with better perceptual ordering for photo conversion
-const PHOTO_RAMP = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
+const PHOTO_RAMP =
+  " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
 
 /**
  * Map brightness (0-255) to ASCII character
  * @param {number} brightness - Value from 0 (dark) to 255 (light)
- * @param {string} ramp - Which character ramp to use
+ * @param {string} ramp - Which character ramp to use (preset key or custom string)
  * @returns {string} ASCII character
  */
 export function brightnessToChar(brightness, ramp = "simple") {
-  const chars =
-    ramp === "full"
-      ? DENSITY_RAMP
-      : ramp === "block"
-        ? BLOCK_RAMP
-        : ramp === "photo"
-          ? PHOTO_RAMP
-          : SIMPLE_RAMP;
+  // Check if ramp is a preset key, otherwise treat as custom character string
+  let chars;
+  if (ramp === "full") {
+    chars = DENSITY_RAMP;
+  } else if (ramp === "block") {
+    chars = BLOCK_RAMP;
+  } else if (ramp === "photo") {
+    chars = PHOTO_RAMP;
+  } else if (ramp === "simple") {
+    chars = SIMPLE_RAMP;
+  } else {
+    // Custom ramp - use the string directly (should start with space for lightest)
+    chars = ramp.length > 0 ? ramp : SIMPLE_RAMP;
+  }
 
   // Invert so dark = dense, light = sparse
   const inverted = 255 - brightness;

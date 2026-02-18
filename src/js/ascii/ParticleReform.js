@@ -19,7 +19,7 @@ export class ParticleReform extends AsciiArt {
   measureCharDimensions() {
     const pre = this.container.querySelector(".ascii-pre");
     const referenceElement = pre || this.container;
-    
+
     // Create a hidden test element to measure actual character width
     const testSpan = document.createElement("span");
     testSpan.textContent = "M"; // Use 'M' as reference (widest char in most fonts)
@@ -33,12 +33,12 @@ export class ParticleReform extends AsciiArt {
       white-space: pre;
     `;
     referenceElement.appendChild(testSpan);
-    
+
     const charWidth = testSpan.getBoundingClientRect().width;
     const charHeight = testSpan.getBoundingClientRect().height;
-    
+
     testSpan.remove();
-    
+
     return { charWidth, charHeight };
   }
 
@@ -144,7 +144,7 @@ export class ParticleReform extends AsciiArt {
 
       // Check if all particles are formed and start reveal timer
       if (this.isHovered && !this.isCompleted) {
-        const allFormed = this.particles.every(p => {
+        const allFormed = this.particles.every((p) => {
           const pdx = p.targetX - p.currentX;
           const pdy = p.targetY - p.currentY;
           return Math.sqrt(pdx * pdx + pdy * pdy) < 2;

@@ -77,7 +77,7 @@ export class GlitchScramble extends AsciiArt {
       for (let col = 0; col < this.cols; col++) {
         const originalChar = this.getChar(row, col);
         if (originalChar === " ") continue;
-        
+
         const element = this.getElement(row, col);
         this.setChar(row, col, originalChar);
         element?.classList.remove("glitching");
@@ -103,7 +103,7 @@ export class GlitchScramble extends AsciiArt {
 
     // Lock in with stagger (visual effect only, chars already revealed)
     const totalDuration = lockOrder.length * 15 + 50; // Estimate total lock-in time
-    
+
     lockOrder.forEach((pos, index) => {
       setTimeout(
         () => {

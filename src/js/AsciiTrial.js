@@ -26,6 +26,8 @@ export class AsciiTrial {
     this.currentEffectName = "static";
     this.cols = 120;
     this.ramp = "photo";
+    this.customRamp = " .oO@";
+    this.weaveText = true;
     this.colorMode = true;
     this.gamma = 1.8;
     this.typewriterSpeed = 1;
@@ -89,7 +91,8 @@ export class AsciiTrial {
 
         // Show/hide typewriter speed slider
         if (this.speedGroup) {
-          this.speedGroup.style.display = this.currentEffectName === "typewriter" ? "block" : "none";
+          this.speedGroup.style.display =
+            this.currentEffectName === "typewriter" ? "block" : "none";
         }
 
         if (this.imageCanvas) {
@@ -114,10 +117,43 @@ export class AsciiTrial {
     this.rampSelect.addEventListener("change", () => {
       this.ramp = this.rampSelect.value;
 
+      // Show/hide custom ramp input and weave toggle
+      const isCustom = this.ramp === "custom";
+      if (this.customRampGroup) {
+        this.customRampGroup.style.display = isCustom ? "block" : "none";
+      }
+      if (this.weaveTextGroup) {
+        this.weaveTextGroup.style.display = isCustom ? "block" : "none";
+      }
+
       if (this.imageCanvas) {
         this.applyEffect();
       }
     });
+
+    // Custom ramp input
+    this.customRampInput = document.getElementById("trial-custom-ramp");
+    this.customRampGroup = document.getElementById("custom-ramp-group");
+    if (this.customRampInput) {
+      this.customRampInput.addEventListener("input", () => {
+        this.customRamp = this.customRampInput.value;
+        if (this.imageCanvas && this.ramp === "custom") {
+          this.applyEffect();
+        }
+      });
+    }
+
+    // Weave text toggle
+    this.weaveTextToggle = document.getElementById("trial-weave");
+    this.weaveTextGroup = document.getElementById("weave-text-group");
+    if (this.weaveTextToggle) {
+      this.weaveTextToggle.addEventListener("change", () => {
+        this.weaveText = this.weaveTextToggle.checked;
+        if (this.imageCanvas && this.ramp === "custom") {
+          this.applyEffect();
+        }
+      });
+    }
 
     // Color toggle
     this.colorToggle = document.getElementById("trial-color");
@@ -200,7 +236,7 @@ export class AsciiTrial {
       this.imageCanvas,
       this.cols,
       rows,
-      this.gamma
+      this.gamma,
     );
 
     // Store for colored rendering
@@ -208,12 +244,84 @@ export class AsciiTrial {
     this.lastColors = colors;
     this.lastRows = rows;
 
+    // Determine which ramp to use
+    const rampToUse = this.ramp === "custom" ? this.customRamp : this.ramp;
+
+    // Check if weave text mode is enabled (custom ramp with weave toggle)
+    const useWeave =
+      this.ramp === "custom" && this.weaveText && this.customRamp.length > 0;
+
     // Convert to ASCII string (for non-colored effects)
+    let ascii = "";
+    let charIndex = 0;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        let char;
+        if (useWeave) {
+          // Weave mode: cycle through custom text sequentially
+          char = this.customRamp[charIndex % this.customRamp.length];
+          charIndex++;
+        } else {
+          // Normal mode: map brightness to character
+          char = brightnessToChar(brightness[y][x], rampToUse);
+        }
+        ascii += char;
+      }
+      if (y < rows - 1) {
+        ascii += "\n";
+      }
+    }
+
+    return ascii;
+  }
+
+  generateAsciiWithRamp(ramp) {
+    if (!this.imageCanvas) return null;
+
+    const aspectRatio = this.imageCanvas.height / this.imageCanvas.width;
+    const rows = Math.round(this.cols * aspectRatio * 0.5);
+
+    const { brightness, colors } = sampleCanvasWithColor(
+      this.imageCanvas,
+      this.cols,
+      rows,
+      this.gamma,
+    );
+
+    this.lastBrightness = brightness;
+    this.lastColors = colors;
+    this.lastRows = rows;
+
     let ascii = "";
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        const char = brightnessToChar(brightness[y][x], this.ramp);
-        ascii += char;
+        ascii += brightnessToChar(brightness[y][x], ramp);
+      }
+      if (y < rows - 1) {
+        ascii += "\n";
+      }
+    }
+
+    return ascii;
+  }
+
+  generateAsciiAtCols(cols, ramp) {
+    if (!this.imageCanvas) return null;
+
+    const aspectRatio = this.imageCanvas.height / this.imageCanvas.width;
+    const rows = Math.round(cols * aspectRatio * 0.5);
+
+    const { brightness } = sampleCanvasWithColor(
+      this.imageCanvas,
+      cols,
+      rows,
+      this.gamma,
+    );
+
+    let ascii = "";
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        ascii += brightnessToChar(brightness[y][x], ramp);
       }
       if (y < rows - 1) {
         ascii += "\n";
@@ -227,11 +335,27 @@ export class AsciiTrial {
     if (!this.lastBrightness || !this.lastColors) return null;
 
     const rows = this.lastRows;
+    const rampToUse = this.ramp === "custom" ? this.customRamp : this.ramp;
+
+    // Check if weave text mode is enabled
+    const useWeave =
+      this.ramp === "custom" && this.weaveText && this.customRamp.length > 0;
+
     let html = "";
+    let charIndex = 0;
 
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        const char = brightnessToChar(this.lastBrightness[y][x], this.ramp);
+        let char;
+        if (useWeave) {
+          // Weave mode: cycle through custom text sequentially
+          char = this.customRamp[charIndex % this.customRamp.length];
+          charIndex++;
+        } else {
+          // Normal mode: map brightness to character
+          char = brightnessToChar(this.lastBrightness[y][x], rampToUse);
+        }
+
         const color = this.lastColors[y][x];
         // Use a slightly brighter version of the color for better visibility
         const boost = 1.1;
@@ -255,8 +379,13 @@ export class AsciiTrial {
   }
 
   applyEffect() {
-    // Generate ASCII from image
-    const ascii = this.generateAscii();
+    // For textmatrix: always use photo ramp for the revealed ASCII art
+    let ascii;
+    if (this.currentEffectName === "textmatrix") {
+      ascii = this.generateAsciiWithRamp("photo");
+    } else {
+      ascii = this.generateAscii();
+    }
     if (!ascii) return;
 
     // Clear previous effect
@@ -294,25 +423,43 @@ export class AsciiTrial {
 
     // Apply the selected effect with optional color support
     const options = this.colorMode ? { colors: this.lastColors } : {};
-    
+
     // Add speed option for typewriter effect
     if (this.currentEffectName === "typewriter") {
       options.speed = this.typewriterSpeed;
+    }
+
+    // Generate wide custom-char ASCII art for textmatrix effect
+    if (this.currentEffectName === "textmatrix") {
+      const rampChars =
+        this.ramp === "custom" && this.customRamp.length > 0
+          ? this.customRamp
+          : "simple";
+      const wideCols = Math.round(this.cols * 2);
+      const wideAscii = this.generateAsciiAtCols(wideCols, rampChars);
+      if (wideAscii) {
+        options.wideAscii = wideAscii;
+      }
     }
 
     // Add reveal image reference for hover reveal
     if (revealImage) {
       options.revealImage = revealImage;
     }
-    
-    this.currentEffect = initAsciiArt(container, ascii, this.currentEffectName, options);
+
+    this.currentEffect = initAsciiArt(
+      container,
+      ascii,
+      this.currentEffectName,
+      options,
+    );
   }
 
   renderColoredWithEffect(container, ascii) {
     // For colored mode with effects, we render the colored base first
     // then let the effect animate over it
     const coloredHtml = this.generateColoredHtml();
-    
+
     // Create a colored pre element as background
     const coloredPre = document.createElement("pre");
     coloredPre.className = "colored-ascii-base";
@@ -325,7 +472,11 @@ export class AsciiTrial {
     container.appendChild(effectLayer);
 
     // Apply effect to the effect layer
-    this.currentEffect = initAsciiArt(effectLayer, ascii, this.currentEffectName);
+    this.currentEffect = initAsciiArt(
+      effectLayer,
+      ascii,
+      this.currentEffectName,
+    );
 
     // Add colored class for special styling
     container.classList.add("has-colored-base");

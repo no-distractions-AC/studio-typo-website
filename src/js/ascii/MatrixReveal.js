@@ -50,8 +50,6 @@ export class MatrixReveal extends AsciiArt {
     this.startRain();
   }
 
-
-
   resetColumns() {
     for (let col = 0; col < this.cols; col++) {
       this.columnStates[col].currentRow = -1;

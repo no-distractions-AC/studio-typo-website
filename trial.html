@@ -14,9 +14,7 @@
           >&larr; Back to Studio Typo</a
         >
         <h1>ASCII Art Trial</h1>
-        <p>
-          Upload your image and see it transformed with ASCII effects
-        </p>
+        <p>Upload your image and see it transformed with ASCII effects</p>
       </header>
 
       <div class="trial-layout">
@@ -55,7 +53,38 @@
                 <option value="full">Full (70 chars)</option>
                 <option value="photo" selected>Photo (95 chars)</option>
                 <option value="block">Block (5 chars)</option>
+                <option value="custom">Custom</option>
               </select>
+            </div>
+
+            <div
+              class="setting-group"
+              id="custom-ramp-group"
+              style="display: none"
+            >
+              <label for="trial-custom-ramp">Custom Characters</label>
+              <input
+                type="text"
+                id="trial-custom-ramp"
+                placeholder="e.g. STUDIOTYPO"
+                value=""
+                class="custom-ramp-input"
+              />
+              <span class="setting-hint"
+                >Light → Dark (start with space for white)</span
+              >
+            </div>
+
+            <div
+              class="setting-group setting-toggle"
+              id="weave-text-group"
+              style="display: none"
+            >
+              <label for="trial-weave">Weave Text</label>
+              <input type="checkbox" id="trial-weave" checked />
+              <span class="setting-hint"
+                >Spell out text in the image pattern</span
+              >
             </div>
 
             <div class="setting-group">
@@ -78,7 +107,11 @@
               <input type="checkbox" id="trial-color" checked />
             </div>
 
-            <div class="setting-group" id="typewriter-speed-group" style="display: none;">
+            <div
+              class="setting-group"
+              id="typewriter-speed-group"
+              style="display: none"
+            >
               <label for="trial-speed">Typewriter Speed</label>
               <div class="setting-row">
                 <input
@@ -101,6 +134,7 @@
           <div class="trial-effects" id="trial-effects">
             <button data-effect="static" class="active">Static</button>
             <button data-effect="matrix">Matrix</button>
+            <button data-effect="textmatrix">Text Matrix</button>
             <button data-effect="typewriter">Typewriter</button>
             <button data-effect="glitch">Glitch</button>
             <button data-effect="particle">Particle</button>

@@ -280,7 +280,7 @@ body {
 .trial-preview .ascii-art-container {
   font-family: var(--font-mono, monospace);
   font-size: 8px;
-  line-height: 1.0;
+  line-height: 1;
   letter-spacing: 0;
   padding: var(--space-4, 16px);
   white-space: pre;
@@ -324,6 +324,36 @@ body {
   pointer-events: none;
   position: relative;
   z-index: 1;
+}
+
+/* Custom ramp input */
+.custom-ramp-input {
+  width: 100%;
+  padding: 0.5rem;
+  background: var(--bg-secondary, #111);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  color: var(--text-primary, #fff);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+}
+
+.custom-ramp-input:focus {
+  outline: none;
+  border-color: var(--accent, #888);
+}
+
+.custom-ramp-input::placeholder {
+  color: var(--text-muted, #666);
+  opacity: 0.7;
+}
+
+.setting-hint {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted, #666);
+  margin-top: 0.25rem;
 }
 
 /* Allow hover on the container, not the pre */
