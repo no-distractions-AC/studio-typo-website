@@ -10,6 +10,9 @@ const SECTION_NAMES = {
   contact: "Contact Us",
 };
 
+// Sections that use full-width layout (no canvas interaction)
+const WIDE_SECTIONS = new Set(["about"]);
+
 export class PageTransition {
   constructor(headingEl, contentEl, onGoHome) {
     this.heading = headingEl;
@@ -83,6 +86,9 @@ export class PageTransition {
     nextSection.classList.add("active");
     this.currentSection = sectionId;
 
+    // Toggle wide layout for sections that don't use the canvas
+    this.content.classList.toggle("content-wide", WIDE_SECTIONS.has(sectionId));
+
     // Scroll content to top
     this.content.scrollTop = 0;
 
@@ -108,6 +114,7 @@ export class PageTransition {
 
     // Hide content container
     this.content.classList.remove("visible");
+    this.content.classList.remove("content-wide");
 
     // Wait for content to fade out
     await this.wait(300);

@@ -236,20 +236,7 @@ body.scrollable {
 
 /* Section Label (appears under brand when in section) */
 .section-label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 400;
-  color: var(--text-secondary);
-  opacity: 0;
-  transform: translateY(-10px);
-  transition:
-    opacity 0.4s ease-out 0.2s,
-    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
-}
-
-.site-heading.top-left .section-label {
-  opacity: 1;
-  transform: translateY(0);
+  display: none;
 }
 
 /* Content Container */
@@ -275,6 +262,11 @@ body.scrollable {
   opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
+}
+
+.content-container.content-wide {
+  width: 100%;
+  padding-left: 320px;
 }
 
 /* Content Sections */
@@ -416,4 +408,193 @@ body.scrollable {
   color: var(--text-secondary);
   line-height: 1.7;
   max-width: 50ch;
+}
+
+/* ==========================================
+   Team Grid / Who Are We
+   ========================================== */
+
+#section-about .section-title {
+  margin-bottom: var(--space-8);
+}
+
+#section-about .about-lead {
+  margin-bottom: var(--space-12);
+}
+
+/* Vertical layout: grid on top, detail panel below */
+.team-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-8) var(--space-6);
+  flex-shrink: 0;
+}
+
+.team-member {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  cursor: pointer;
+  transition:
+    opacity 0.3s var(--ease-out),
+    filter 0.3s var(--ease-out);
+}
+
+.team-member:hover {
+  z-index: 2;
+}
+
+.team-member:hover .team-ascii-container {
+  transform: scale(1.2);
+}
+
+/* Grey out non-hovered members when one is active */
+.team-member.greyed {
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+.team-member.greyed .team-info {
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+/* ASCII art container */
+.team-ascii-container {
+  position: relative;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 4px;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: pre;
+  cursor: pointer;
+  overflow: visible;
+  transition: transform 0.3s var(--ease-out);
+  transform-origin: center center;
+}
+
+.team-ascii-container .ascii-pre {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  pointer-events: none;
+  position: relative;
+}
+
+/* Reveal image (photo that fades in when particles form) */
+.team-reveal-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  z-index: 2;
+  transition: opacity 0.5s var(--ease-out);
+  pointer-events: none;
+}
+
+.team-reveal-image.visible {
+  opacity: 1;
+}
+
+/* Info block - always visible below portrait */
+.team-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: var(--space-3);
+  text-align: center;
+}
+
+.team-name-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.team-role {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.team-bio {
+  display: none;
+}
+
+/* Shared detail panel below grid — collapsed until hover */
+.team-detail-panel {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out),
+    max-height 0.4s var(--ease-out);
+  pointer-events: none;
+}
+
+.team-detail-panel.visible {
+  max-height: 400px;
+  overflow: visible;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.team-detail-panel .detail-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1);
+}
+
+.team-detail-panel .detail-role {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-4);
+}
+
+.team-detail-panel .detail-bio {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Fallback if image fails to load */
+.team-fallback {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
 }

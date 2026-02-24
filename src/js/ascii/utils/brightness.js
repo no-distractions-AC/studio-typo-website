@@ -11,7 +11,9 @@
 export async function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (!src.startsWith("data:")) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => {
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -149,11 +151,20 @@ export function sampleCanvasWithColor(canvas, cols, rows, gamma = 1.0) {
           const r = data[idx];
           const g = data[idx + 1];
           const b = data[idx + 2];
+          const a = data[idx + 3];
 
-          totalR += r;
-          totalG += g;
-          totalB += b;
-          totalBrightness += 0.299 * r + 0.587 * g + 0.114 * b;
+          // Transparent pixels contribute as white (will become spaces)
+          if (a < 128) {
+            totalR += 255;
+            totalG += 255;
+            totalB += 255;
+            totalBrightness += 255;
+          } else {
+            totalR += r;
+            totalG += g;
+            totalB += b;
+            totalBrightness += 0.299 * r + 0.587 * g + 0.114 * b;
+          }
           sampleCount++;
         }
       }

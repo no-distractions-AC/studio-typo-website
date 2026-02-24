@@ -46,6 +46,16 @@
   .hint {
     bottom: var(--space-16);
   }
+
+  /* Team: stack layout vertically on mobile */
+  .team-layout {
+    flex-direction: column;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
 }
 
 /* Small mobile: < 480px */

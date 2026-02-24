@@ -57,7 +57,7 @@ export class AsciiArt {
         // Apply color if available
         if (this.colors && this.colors[row] && this.colors[row][col]) {
           const color = this.colors[row][col];
-          const boost = 1.1;
+          const boost = 1.3;
           const r = Math.min(255, Math.round(color.r * boost));
           const g = Math.min(255, Math.round(color.g * boost));
           const b = Math.min(255, Math.round(color.b * boost));

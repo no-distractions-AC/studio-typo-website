@@ -11,6 +11,7 @@ import { Navigation } from "./ui/Navigation.js";
 import { ThemeToggle } from "./ui/ThemeToggle.js";
 import { SoundToggle } from "./ui/SoundToggle.js";
 import { PageTransition } from "./ui/PageTransition.js";
+import { TeamSection } from "./ui/TeamSection.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -58,6 +59,7 @@ export class App {
     this.themeToggle = null;
     this.soundToggle = null;
     this.pageTransition = null;
+    this.teamSection = null;
 
     // Input handlers
     this.keyboardHandler = null;
@@ -177,6 +179,9 @@ export class App {
       },
     );
 
+    // Initialize team section (lazy-initialized on first visit)
+    this.teamSection = new TeamSection();
+
     // Initialize navigation first (needed for callback)
     this.navigation = new Navigation(
       document.getElementById("navigation"),
@@ -185,6 +190,11 @@ export class App {
         this.pageTransition.transitionTo(section);
         this.navigation.setActive(section);
         analytics.trackNavigation(section);
+
+        // Lazy-initialize team section on first visit
+        if (section === "about") {
+          this.teamSection.activate();
+        }
       },
     );
 
