@@ -370,6 +370,14 @@ body.scrollable {
   color: var(--text-secondary);
 }
 
+.work-tags {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+  letter-spacing: 0.02em;
+}
+
 /* Contact */
 .contact-lead {
   font-size: var(--text-xl);
@@ -469,47 +477,22 @@ body.scrollable {
   transition: opacity 0.3s var(--ease-out);
 }
 
-/* ASCII art container */
-.team-ascii-container {
-  position: relative;
+/* Team photo */
+.team-photo-container {
   width: 100%;
-  font-family: var(--font-mono);
-  font-size: 4px;
-  line-height: 1;
-  letter-spacing: 0;
-  white-space: pre;
-  cursor: pointer;
-  overflow: visible;
   transition: transform 0.3s var(--ease-out);
   transform-origin: center center;
 }
 
-.team-ascii-container .ascii-pre {
-  margin: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  letter-spacing: inherit;
-  pointer-events: none;
-  position: relative;
+.team-member:hover .team-photo-container {
+  transform: scale(1.05);
 }
 
-/* Reveal image (photo that fades in when particles form) */
-.team-reveal-image {
-  position: absolute;
-  top: 0;
-  left: 0;
+.team-photo {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
   object-fit: contain;
-  opacity: 0;
-  z-index: 2;
-  transition: opacity 0.5s var(--ease-out);
-  pointer-events: none;
-}
-
-.team-reveal-image.visible {
-  opacity: 1;
 }
 
 /* Info block - always visible below portrait */

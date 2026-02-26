@@ -1,25 +1,13 @@
 /**
  * TeamSection - Manages the "Who Are We" team showcase
- * Split layout: compact team grid on left, shared detail panel on right.
- * Hovering a person reveals their portrait, greys out others,
- * and shows their details in the right panel.
+ * Shows team photos with detail panel on hover.
  */
 
 import { TEAM } from "../data/team.js";
-import {
-  generateWeaveAscii,
-  generatePlaceholderImage,
-  generateSilhouetteMask,
-} from "../ascii/utils/weave.js";
-import { TeamPortrait } from "../ascii/TeamPortrait.js";
-
-const ASCII_COLS = 120;
-const ASCII_GAMMA = 1.8;
 
 export class TeamSection {
   constructor() {
     this.sectionEl = document.getElementById("section-about");
-    this.portraits = [];
     this.memberCards = [];
     this.detailPanel = null;
     this.initialized = false;
@@ -29,34 +17,16 @@ export class TeamSection {
   async activate() {
     if (this.initialized) return;
     this.initialized = true;
-
     this.buildLayout();
-    await this.waitForVisible();
-    await Promise.all(TEAM.map((member) => this.initPortrait(member)));
-  }
-
-  waitForVisible() {
-    return new Promise((resolve) => {
-      const check = () => {
-        if (this.sectionEl.classList.contains("active")) {
-          requestAnimationFrame(() => requestAnimationFrame(resolve));
-        } else {
-          requestAnimationFrame(check);
-        }
-      };
-      check();
-    });
   }
 
   buildLayout() {
     const inner = this.sectionEl.querySelector(".section-inner-wide");
     if (!inner) return;
 
-    // Flex container: grid (left) + detail panel (right)
     const layout = document.createElement("div");
     layout.className = "team-layout";
 
-    // Team grid (left side)
     const grid = document.createElement("div");
     grid.className = "team-grid";
 
@@ -65,9 +35,14 @@ export class TeamSection {
       card.className = "team-member";
       card.dataset.memberId = member.id;
 
-      const asciiContainer = document.createElement("div");
-      asciiContainer.className = "team-ascii-container";
-      asciiContainer.id = `team-ascii-${member.id}`;
+      const imgContainer = document.createElement("div");
+      imgContainer.className = "team-photo-container";
+
+      const img = document.createElement("img");
+      img.className = "team-photo";
+      img.src = member.photo;
+      img.alt = member.name;
+      imgContainer.appendChild(img);
 
       const info = document.createElement("div");
       info.className = "team-info";
@@ -76,18 +51,22 @@ export class TeamSection {
         <span class="team-role">${member.role}</span>
       `;
 
-      card.appendChild(asciiContainer);
+      card.appendChild(imgContainer);
       card.appendChild(info);
       grid.appendChild(card);
       this.memberCards.push(card);
+
+      card.addEventListener("mouseenter", () => {
+        this.showMemberDetail(member);
+      });
+      card.addEventListener("mouseleave", () => {
+        this.hideMemberDetail();
+      });
     }
 
-    // Shared detail panel (right side)
     const panel = document.createElement("div");
     panel.className = "team-detail-panel";
-    panel.innerHTML = `
-      <div class="detail-bio"></div>
-    `;
+    panel.innerHTML = `<div class="detail-bio"></div>`;
     this.detailPanel = panel;
 
     layout.appendChild(grid);
@@ -95,18 +74,13 @@ export class TeamSection {
     inner.appendChild(layout);
   }
 
-  /**
-   * Show the detail panel for a specific member and grey out others
-   */
   showMemberDetail(member) {
     if (!this.detailPanel) return;
     this.activeMemberId = member.id;
 
-    // Populate panel with bio only (name/role already visible under portrait)
     this.detailPanel.querySelector(".detail-bio").textContent = member.detail;
     this.detailPanel.classList.add("visible");
 
-    // Grey out other members
     for (const card of this.memberCards) {
       if (card.dataset.memberId !== member.id) {
         card.classList.add("greyed");
@@ -114,9 +88,6 @@ export class TeamSection {
     }
   }
 
-  /**
-   * Hide the detail panel and un-grey all members
-   */
   hideMemberDetail() {
     this.activeMemberId = null;
 
@@ -129,45 +100,7 @@ export class TeamSection {
     }
   }
 
-  async initPortrait(member) {
-    const container = document.getElementById(`team-ascii-${member.id}`);
-    if (!container) return;
-
-    try {
-      // Use real photo if available, otherwise fall back to placeholder + mask
-      const hasPhoto = !!member.photo;
-      const asciiSource = hasPhoto
-        ? member.photo
-        : generateSilhouetteMask(member.name);
-      const { ascii, colors } = await generateWeaveAscii(
-        asciiSource,
-        ASCII_COLS,
-        member.name,
-        ASCII_GAMMA,
-      );
-
-      const portrait = new TeamPortrait(container, ascii, {
-        colors: hasPhoto ? colors : null,
-        onFormComplete: () => {
-          this.showMemberDetail(member);
-        },
-        onScatter: () => {
-          this.hideMemberDetail();
-        },
-      });
-
-      this.portraits.push(portrait);
-    } catch (err) {
-      console.error(`Failed to load portrait for ${member.name}:`, err);
-      container.innerHTML = `<span class="team-fallback">${member.name}</span>`;
-    }
-  }
-
   dispose() {
-    for (const portrait of this.portraits) {
-      portrait.dispose();
-    }
-    this.portraits = [];
     this.memberCards = [];
     this.initialized = false;
   }
