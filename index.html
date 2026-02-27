@@ -107,11 +107,11 @@
     />
     <meta
       property="og:image"
-      content="https://ravaan.github.io/studio-typo-website/og-image.png"
+      content="https://studiotypo.xyz/og-image.png"
     />
     <meta
       property="og:url"
-      content="https://ravaan.github.io/studio-typo-website/"
+      content="https://studiotypo.xyz/"
     />
 
     <!-- Twitter Card -->
@@ -237,7 +237,7 @@
     <main id="content" class="content-container">
       <!-- Services Section -->
       <section id="section-services" class="content-section">
-        <div class="section-inner">
+        <div class="section-inner-wide">
           <h2 class="section-title">Services</h2>
           <div class="service-grid">
             <div class="service-item">
@@ -276,7 +276,7 @@
 
       <!-- Work Section -->
       <section id="section-work" class="content-section">
-        <div class="section-inner">
+        <div class="section-inner-wide">
           <h2 class="section-title">Selected Work</h2>
           <div class="work-grid">
             <div class="work-item">
@@ -484,12 +484,65 @@
 
       <!-- Contact Us Section -->
       <section id="section-contact" class="content-section">
-        <div class="section-inner">
-          <h2 class="section-title">Contact Us</h2>
-          <p class="contact-lead">Let's build something remarkable together.</p>
-          <div class="contact-links">
-            <a href="mailto:hello@studiotypo.com" class="contact-link"
-              >hello@studiotypo.com</a
+        <div class="section-inner-wide">
+          <div id="typing-speed" class="typing-speed" aria-live="polite"></div>
+          <h2 class="section-title contact-reactive">Contact Us</h2>
+          <p class="contact-lead contact-reactive">Let's build something remarkable together.</p>
+
+          <form id="contact-form" class="contact-form" novalidate>
+            <div class="form-group">
+              <label for="contact-name" class="form-label contact-reactive">Name</label>
+              <input
+                type="text"
+                id="contact-name"
+                name="name"
+                class="form-input"
+                placeholder="Your name"
+                required
+                autocomplete="name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="contact-email" class="form-label contact-reactive">Email</label>
+              <input
+                type="email"
+                id="contact-email"
+                name="email"
+                class="form-input"
+                placeholder="you@example.com"
+                required
+                autocomplete="email"
+              />
+            </div>
+            <div class="form-group">
+              <label for="contact-message" class="form-label contact-reactive">Message</label>
+              <div class="textarea-wrapper" id="textarea-wrapper">
+                <div
+                  id="contact-message-mirror"
+                  class="form-textarea-mirror"
+                  aria-hidden="true"
+                ></div>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  class="form-textarea"
+                  placeholder="Tell us about your project..."
+                  rows="6"
+                  required
+                  spellcheck="false"
+                ></textarea>
+              </div>
+            </div>
+            <button type="submit" class="form-submit contact-reactive">
+              <span class="submit-text">Send Message</span>
+              <span class="submit-sending hidden">Sending...</span>
+              <span class="submit-sent hidden">Sent!</span>
+            </button>
+          </form>
+
+          <div class="contact-links contact-reactive">
+            <a href="mailto:hello@studiotypo.xyz" class="contact-link"
+              >hello@studiotypo.xyz</a
             >
             <a href="#" class="contact-link">Twitter</a>
             <a href="#" class="contact-link">LinkedIn</a>
@@ -526,6 +579,12 @@
         aria-pressed="true"
         title="Toggle sound effects"
       ></button>
+      <button
+        id="effect-toggle"
+        class="toggle-btn effect-toggle"
+        aria-label="Change particle effect"
+        title="Change effect"
+      >Embers</button>
     </div>
 
     <!-- Interaction Hint (READY state) -->

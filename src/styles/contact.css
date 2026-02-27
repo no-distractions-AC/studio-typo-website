@@ -1,0 +1,274 @@
+/**
+ * Contact Section Styles
+ * Form, textarea mirror overlay, and typo highlight animations
+ */
+
+/* Center the contact section within the content area.
+   The parent .content-container.content-wide has padding: 120px 60px 60px 320px.
+   We fill the available space and center children within it. */
+#section-contact .section-inner-wide {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Form layout */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  max-width: 600px;
+  width: 100%;
+  text-align: left;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Labels */
+.form-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color var(--duration-normal) var(--ease-out);
+}
+
+.form-label.active {
+  color: var(--text-primary);
+}
+
+/* Inputs & Textarea */
+.form-input,
+.form-textarea {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-primary);
+  padding: var(--space-3) 0;
+  width: 100%;
+  transition:
+    border-color var(--duration-normal) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-bottom-color: var(--text-primary);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.6;
+}
+
+/* Textarea specifics */
+.textarea-wrapper {
+  position: relative;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 150px;
+  line-height: 1.7;
+}
+
+/* Mirror overlay for spell-check highlights */
+.form-textarea-mirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  padding: var(--space-3) 0;
+  color: transparent;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  pointer-events: none;
+  border-bottom: 1px solid transparent;
+}
+
+/* Submit button */
+.form-submit {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  padding: var(--space-3) var(--space-8);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-normal) var(--ease-out),
+    background var(--duration-normal) var(--ease-out),
+    transform var(--duration-fast) var(--ease-key-release);
+}
+
+.form-submit:hover {
+  border-color: var(--text-primary);
+  background: var(--accent-subtle);
+}
+
+.form-submit:active {
+  transform: scale(0.98);
+}
+
+.form-submit.sending {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.form-submit.sent {
+  border-color: var(--text-primary);
+  background: var(--accent-subtle);
+}
+
+/* Contact links spacing when below form */
+.contact-form + .contact-links {
+  margin-top: var(--space-10);
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Typo highlight animations */
+@keyframes typoShimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes typoWiggle {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-0.5px);
+  }
+  75% {
+    transform: translateX(0.5px);
+  }
+}
+
+/* Typo highlight span (inside mirror overlay) */
+.typo-highlight {
+  position: relative;
+  border-bottom: 2px solid var(--typo-highlight-border);
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--typo-highlight) 45%,
+    var(--typo-highlight) 55%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: typoShimmer 2s ease-in-out infinite;
+  padding: 2px 1px;
+  margin: 0 -1px;
+}
+
+/* Newly detected typo — plays wiggle once */
+.typo-highlight.new {
+  animation:
+    typoShimmer 2s ease-in-out infinite,
+    typoWiggle 0.3s ease-in-out 1;
+}
+
+/* Typing speed indicator — fixed top right */
+.typing-speed {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: var(--z-navigation);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.typing-speed.visible {
+  opacity: 1;
+}
+
+/* Individual character wrapper (for letter highlighting) */
+.char {
+  display: inline-block;
+  position: relative;
+}
+
+/* Lit state — matching letter was just typed */
+.char-lit {
+  color: var(--typo-highlight-border);
+  text-shadow:
+    0 0 6px var(--typo-highlight),
+    0 0 14px var(--typo-highlight),
+    0 0 28px var(--typo-highlight);
+  transform: scale(1.3);
+  animation: charLit 0.8s var(--ease-key-release) forwards;
+}
+
+@keyframes charLit {
+  0% {
+    color: var(--typo-highlight-border);
+    text-shadow:
+      0 0 6px var(--typo-highlight),
+      0 0 14px var(--typo-highlight),
+      0 0 28px var(--typo-highlight);
+    transform: scale(1.3);
+  }
+  30% {
+    color: var(--typo-highlight-border);
+    text-shadow:
+      0 0 4px var(--typo-highlight),
+      0 0 10px var(--typo-highlight);
+    transform: scale(1.08);
+  }
+  100% {
+    color: inherit;
+    text-shadow: none;
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .contact-form {
+    max-width: 100%;
+  }
+
+  .form-submit {
+    width: 100%;
+    text-align: center;
+  }
+
+  .form-textarea {
+    min-height: 120px;
+  }
+}

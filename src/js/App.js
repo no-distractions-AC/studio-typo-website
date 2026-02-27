@@ -12,6 +12,7 @@ import { ThemeToggle } from "./ui/ThemeToggle.js";
 import { SoundToggle } from "./ui/SoundToggle.js";
 import { PageTransition } from "./ui/PageTransition.js";
 import { TeamSection } from "./ui/TeamSection.js";
+import { ContactSection } from "./ui/ContactSection.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -182,6 +183,9 @@ export class App {
     // Initialize team section (lazy-initialized on first visit)
     this.teamSection = new TeamSection();
 
+    // Initialize contact section (lazy-initialized on first visit)
+    this.contactSection = new ContactSection(this.audioManager);
+
     // Initialize navigation first (needed for callback)
     this.navigation = new Navigation(
       document.getElementById("navigation"),
@@ -191,9 +195,12 @@ export class App {
         this.navigation.setActive(section);
         analytics.trackNavigation(section);
 
-        // Lazy-initialize team section on first visit
+        // Lazy-initialize sections on first visit
         if (section === "about") {
           this.teamSection.activate();
+        }
+        if (section === "contact") {
+          this.contactSection.activate();
         }
       },
     );
@@ -232,13 +239,32 @@ export class App {
           }
         }
 
-        // In MAIN state, animate key press
+        // In MAIN state, animate key press (skip when typing in forms)
         if (this.state === STATES.MAIN) {
-          const keyModel = this.keyboardLayout.getTypoKey(key);
-          if (keyModel) {
-            keyModel.press();
-            this.audioManager.playKeyPress();
-            setTimeout(() => keyModel.release(), 100);
+          const activeEl = document.activeElement;
+          const isFormInput =
+            activeEl?.tagName === "INPUT" ||
+            activeEl?.tagName === "TEXTAREA";
+
+          if (!isFormInput) {
+            const keyModel = this.keyboardLayout.getTypoKey(key);
+            if (keyModel) {
+              keyModel.press();
+              this.audioManager.playKeyPress(key);
+              setTimeout(() => keyModel.release(), 100);
+            }
+          }
+        }
+      },
+      onKeyUp: (key) => {
+        if (this.state === STATES.MAIN) {
+          const activeEl = document.activeElement;
+          const isFormInput =
+            activeEl?.tagName === "INPUT" ||
+            activeEl?.tagName === "TEXTAREA";
+
+          if (!isFormInput) {
+            this.audioManager.playKeyRelease(key);
           }
         }
       },
@@ -254,8 +280,11 @@ export class App {
         this.triggerIntro(keyModel.letter);
       } else if (this.state === STATES.MAIN) {
         keyModel.press();
-        this.audioManager.playKeyPress();
-        setTimeout(() => keyModel.release(), 100);
+        this.audioManager.playKeyPress(keyModel.letter);
+        setTimeout(() => {
+          keyModel.release();
+          this.audioManager.playKeyRelease(keyModel.letter);
+        }, 100);
       }
     };
   }

@@ -1,17 +1,39 @@
 /**
- * AudioManager - Web Audio API sound system with Cherry MX Blue modal synthesis
+ * AudioManager - Web Audio API sound system with Holy Panda switch samples
+ * Inspired by kbsim: separate press/release sounds, row-based variants,
+ * per-keypress instances for polyphony, and held-key tracking.
  */
 
 import { CONFIG } from "../../config.js";
+
+const PRESS_NAMES = [
+  "GENERIC_R0",
+  "GENERIC_R1",
+  "GENERIC_R2",
+  "GENERIC_R3",
+  "GENERIC_R4",
+  "SPACE",
+  "ENTER",
+  "BACKSPACE",
+];
+
+const RELEASE_NAMES = ["GENERIC", "SPACE", "ENTER", "BACKSPACE"];
+
+const SPECIAL_KEY_MAP = {
+  " ": "SPACE",
+  Enter: "ENTER",
+  Backspace: "BACKSPACE",
+};
 
 export class AudioManager {
   constructor() {
     this.context = null;
     this.masterGain = null;
+    this.pressBuffers = {};
+    this.releaseBuffers = {};
+    this.pressedKeys = new Set();
     this.typingLoopSource = null;
     this.typingLoopBuffer = null;
-    this.keyPressBuffer = null;
-    this.brownNoiseBuffer = null;
     this.enabled = true;
     this.initialized = false;
     this.typingLoopTimeout = null;
@@ -29,17 +51,12 @@ export class AudioManager {
       this.masterGain.connect(this.context.destination);
       this.masterGain.gain.value = CONFIG.audio.masterVolume;
 
-      // Resume context (required after user interaction)
       if (this.context.state === "suspended") {
         await this.context.resume();
       }
 
-      // Generate brown noise buffer for modal synthesis
-      this.brownNoiseBuffer = this.createBrownNoiseBuffer();
-
       this.initialized = true;
 
-      // Try to load audio files (will fall back to synthetic if not found)
       await this.loadSounds();
     } catch (error) {
       console.error("Failed to initialize audio:", error);
@@ -48,40 +65,32 @@ export class AudioManager {
   }
 
   /**
-   * Create brown noise buffer for modal synthesis
-   */
-  createBrownNoiseBuffer() {
-    const sampleRate = this.context.sampleRate;
-    const length = Math.floor(sampleRate * 0.05);
-    const buffer = this.context.createBuffer(1, length, sampleRate);
-    const data = buffer.getChannelData(0);
-
-    let lastOut = 0;
-    for (let i = 0; i < length; i++) {
-      const white = Math.random() * 2 - 1;
-      lastOut = (lastOut + 0.02 * white) / 1.02;
-      data[i] = lastOut * 3.5;
-    }
-
-    return buffer;
-  }
-
-  /**
-   * Load audio files (optional, falls back to synthetic)
+   * Load all Holy Panda sound files
    */
   async loadSounds() {
-    try {
-      const [loopBuffer, pressBuffer] = await Promise.all([
-        this.loadSound("/assets/audio/typing-loop.mp3"),
-        this.loadSound("/assets/audio/key-press.mp3"),
-      ]);
+    const base = "/assets/audio/holypanda";
 
-      this.typingLoopBuffer = loopBuffer;
-      this.keyPressBuffer = pressBuffer;
-    } catch (error) {
-      // Using synthetic sounds as fallback - this is expected
-      console.info("Using synthetic audio sounds");
+    try {
+      // Load typing loop (if available)
+      this.typingLoopBuffer = await this.loadSound(
+        "/assets/audio/typing-loop.ogg",
+      );
+    } catch (e) {
+      // No typing loop file — will use synthetic loop
     }
+
+    // Load all press and release sounds in parallel
+    const pressPromises = PRESS_NAMES.map(async (name) => {
+      const buffer = await this.loadSound(`${base}/press/${name}.mp3`);
+      if (buffer) this.pressBuffers[name] = buffer;
+    });
+
+    const releasePromises = RELEASE_NAMES.map(async (name) => {
+      const buffer = await this.loadSound(`${base}/release/${name}.mp3`);
+      if (buffer) this.releaseBuffers[name] = buffer;
+    });
+
+    await Promise.all([...pressPromises, ...releasePromises]);
   }
 
   /**
@@ -90,17 +99,82 @@ export class AudioManager {
   async loadSound(url) {
     try {
       const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const arrayBuffer = await response.arrayBuffer();
       return await this.context.decodeAudioData(arrayBuffer);
     } catch (error) {
-      // Silent fail - will use synthetic sounds
       return null;
     }
+  }
+
+  /**
+   * Play key press sound
+   */
+  playKeyPress(key) {
+    if (!this.enabled || !this.initialized) return;
+
+    // Prevent repeat fire when key is held down
+    if (key && this.pressedKeys.has(key)) return;
+    if (key) this.pressedKeys.add(key);
+
+    const bufferName = this.getPressBufferName(key);
+    const buffer = this.pressBuffers[bufferName];
+    if (buffer) {
+      this.playBuffer(buffer);
+    }
+  }
+
+  /**
+   * Play key release sound
+   */
+  playKeyRelease(key) {
+    if (!this.enabled || !this.initialized) return;
+
+    if (key) this.pressedKeys.delete(key);
+
+    const special = key ? SPECIAL_KEY_MAP[key] : null;
+    const bufferName = special || "GENERIC";
+    const buffer = this.releaseBuffers[bufferName];
+    if (buffer) {
+      this.playBuffer(buffer);
+    }
+  }
+
+  /**
+   * Get the press buffer name for a given key
+   */
+  getPressBufferName(key) {
+    if (!key) {
+      // No key specified (e.g. typing loop) — random generic
+      return `GENERIC_R${Math.floor(Math.random() * 5)}`;
+    }
+
+    const special = SPECIAL_KEY_MAP[key];
+    if (special) return special;
+
+    // Random row variant for regular keys
+    return `GENERIC_R${Math.floor(Math.random() * 5)}`;
+  }
+
+  /**
+   * Play audio buffer with slight pitch variation
+   */
+  playBuffer(buffer) {
+    const source = this.context.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = 0.95 + Math.random() * 0.1;
+
+    const gain = this.context.createGain();
+    gain.gain.value = CONFIG.audio.keyPressVolume;
+
+    source.connect(gain);
+    gain.connect(this.masterGain);
+    source.start();
+
+    source.onended = () => {
+      source.disconnect();
+      gain.disconnect();
+    };
   }
 
   /**
@@ -110,7 +184,6 @@ export class AudioManager {
     if (!this.enabled || !this.initialized) return;
 
     if (this.typingLoopBuffer) {
-      // Use loaded audio file
       this.typingLoopSource = this.context.createBufferSource();
       this.typingLoopSource.buffer = this.typingLoopBuffer;
       this.typingLoopSource.loop = true;
@@ -126,7 +199,6 @@ export class AudioManager {
       loopGain.connect(this.masterGain);
       this.typingLoopSource.start();
     } else {
-      // Use synthetic typing loop
       this.startSyntheticTypingLoop();
     }
   }
@@ -152,143 +224,7 @@ export class AudioManager {
   }
 
   /**
-   * Play key press sound
-   */
-  playKeyPress() {
-    if (!this.enabled || !this.initialized) return;
-
-    if (this.keyPressBuffer) {
-      this.playBuffer(this.keyPressBuffer);
-    } else {
-      this.playModalKeypress();
-    }
-  }
-
-  /**
-   * Play audio buffer with slight variation
-   */
-  playBuffer(buffer) {
-    const source = this.context.createBufferSource();
-    source.buffer = buffer;
-
-    // Slight pitch variation for realism
-    source.playbackRate.value = 0.95 + Math.random() * 0.1;
-
-    const pressGain = this.context.createGain();
-    pressGain.gain.value = CONFIG.audio.keyPressVolume;
-
-    source.connect(pressGain);
-    pressGain.connect(this.masterGain);
-    source.start();
-
-    // Auto cleanup
-    source.onended = () => {
-      source.disconnect();
-      pressGain.disconnect();
-    };
-  }
-
-  /**
-   * Play Cherry MX Blue modal synthesis keypress
-   * 3 events: click mechanism, bottom-out impact, upstroke return
-   */
-  playModalKeypress() {
-    if (!this.context || !this.brownNoiseBuffer) return;
-
-    const t = this.context.currentTime;
-
-    // Event 1: Click mechanism (t + 0ms)
-    this.triggerModalImpact(t, {
-      duration: 0.002,
-      modes: [
-        { freq: 1100 * this.rand(0.97, 1.03), Q: 8, gain: 0.5 },
-        { freq: 2200 * this.rand(0.97, 1.03), Q: 5, gain: 0.25 },
-        { freq: 3800 * this.rand(0.97, 1.03), Q: 3, gain: 0.1 },
-      ],
-      masterGain: 0.4,
-    });
-
-    // Event 2: Bottom-out impact (t + 1.5ms) - the main "thock"
-    this.triggerModalImpact(t + 0.0015, {
-      duration: 0.004,
-      modes: [
-        { freq: 160 * this.rand(0.95, 1.05), Q: 28, gain: 0.7 },
-        { freq: 280 * this.rand(0.95, 1.05), Q: 22, gain: 0.5 },
-        { freq: 520 * this.rand(0.97, 1.03), Q: 18, gain: 1.0 },
-        { freq: 780 * this.rand(0.97, 1.03), Q: 14, gain: 0.6 },
-        { freq: 1150 * this.rand(0.97, 1.03), Q: 10, gain: 0.35 },
-        { freq: 1800 * this.rand(0.97, 1.03), Q: 6, gain: 0.2 },
-        { freq: 2900 * this.rand(0.97, 1.03), Q: 4, gain: 0.1 },
-      ],
-      masterGain: 0.8,
-    });
-
-    // Event 3: Upstroke return (t + 55ms)
-    this.triggerModalImpact(t + 0.055, {
-      duration: 0.0015,
-      modes: [
-        { freq: 1250 * this.rand(0.97, 1.03), Q: 7, gain: 0.3 },
-        { freq: 2000 * this.rand(0.97, 1.03), Q: 5, gain: 0.15 },
-        { freq: 200 * this.rand(0.95, 1.05), Q: 15, gain: 0.2 },
-      ],
-      masterGain: 0.25,
-    });
-  }
-
-  /**
-   * Trigger a modal impact with bandpass filter bank
-   */
-  triggerModalImpact(startTime, config) {
-    const ctx = this.context;
-
-    // Create noise exciter
-    const exciter = ctx.createBufferSource();
-    exciter.buffer = this.brownNoiseBuffer;
-
-    // Exciter envelope
-    const exciterGain = ctx.createGain();
-    exciterGain.gain.setValueAtTime(0.001, startTime);
-    exciterGain.gain.linearRampToValueAtTime(1.0, startTime + 0.0001);
-    exciterGain.gain.exponentialRampToValueAtTime(
-      0.001,
-      startTime + config.duration,
-    );
-
-    exciter.connect(exciterGain);
-
-    // Master gain for this impact
-    const impactGain = ctx.createGain();
-    impactGain.gain.value = config.masterGain * CONFIG.audio.keyPressVolume;
-    impactGain.connect(this.masterGain);
-
-    // Create bandpass filter for each mode
-    config.modes.forEach((mode) => {
-      const filter = ctx.createBiquadFilter();
-      filter.type = "bandpass";
-      filter.frequency.value = mode.freq;
-      filter.Q.value = mode.Q;
-
-      const modeGain = ctx.createGain();
-      modeGain.gain.value = mode.gain * this.rand(0.85, 1.15);
-
-      exciterGain.connect(filter);
-      filter.connect(modeGain);
-      modeGain.connect(impactGain);
-    });
-
-    exciter.start(startTime);
-    exciter.stop(startTime + config.duration + 0.15);
-  }
-
-  /**
-   * Random value in range for natural variation
-   */
-  rand(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  /**
-   * Start synthetic typing loop
+   * Start synthetic typing loop using press samples
    */
   startSyntheticTypingLoop() {
     const scheduleNextKey = () => {
@@ -297,14 +233,12 @@ export class AudioManager {
         return;
       }
 
-      this.playModalKeypress();
+      this.playKeyPress();
 
-      // Random interval for natural typing rhythm
       const nextDelay = 100 + Math.random() * 150;
       this.typingLoopTimeout = setTimeout(scheduleNextKey, nextDelay);
     };
 
-    // Start with slight delay
     this.typingLoopTimeout = setTimeout(scheduleNextKey, 500);
   }
 
@@ -314,7 +248,6 @@ export class AudioManager {
   setEnabled(enabled) {
     this.enabled = enabled;
 
-    // Fade instead of abrupt cut
     if (this.masterGain && this.context) {
       this.masterGain.gain.linearRampToValueAtTime(
         enabled ? CONFIG.audio.masterVolume : 0,
@@ -322,12 +255,10 @@ export class AudioManager {
       );
     }
 
-    // Stop typing loop when disabled
     if (!enabled) {
       this.stopTypingLoop();
     }
 
-    // Persist preference
     localStorage.setItem(CONFIG.sound.storageKey, String(enabled));
   }
 

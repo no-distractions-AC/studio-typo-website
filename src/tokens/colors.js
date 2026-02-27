@@ -54,6 +54,8 @@ export const themes = {
     accent: palette.white,
     accentHover: palette.gray[300],
     shimmer: palette.blue,
+    typoHighlight: "rgba(0, 128, 254, 0.25)",
+    typoHighlightBorder: palette.blue,
     lighting: {
       main: palette.white,
       fill: palette.lightBlue,
@@ -86,6 +88,8 @@ export const themes = {
     accent: palette.black,
     accentHover: "#333333",
     shimmer: palette.blue,
+    typoHighlight: "rgba(128, 128, 255, 0.15)",
+    typoHighlightBorder: palette.lightBlue,
     lighting: {
       main: palette.white,
       fill: palette.white,
