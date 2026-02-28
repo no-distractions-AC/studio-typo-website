@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Effects Lab | Studio Typo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/effects-trial.css" />
+  </head>
+  <body>
+    <main class="effects-trial-page">
+      <header class="trial-header">
+        <a href="/studio-typo-website/" class="back-link"
+          >&larr; Back to Studio Typo</a
+        >
+        <h1>Image Effects Lab</h1>
+        <p>Explore WebGL and CSS image effects. Hover each card to interact.</p>
+      </header>
+
+      <!-- Image Selector -->
+      <div class="image-selector" id="image-selector">
+        <div class="image-thumbnails" id="image-thumbnails">
+          <!-- Populated by JS with team photos -->
+        </div>
+        <div class="image-upload">
+          <input type="file" accept="image/*" id="effects-file-input" hidden />
+          <button class="upload-btn" id="upload-btn">+ Upload</button>
+        </div>
+      </div>
+
+      <!-- Effects Grid -->
+      <div class="effects-grid" id="effects-grid">
+        <!-- Populated by JS: one .effect-card per effect -->
+      </div>
+    </main>
+
+    <script type="module" src="/src/js/effects-trial.js"></script>
+  </body>
+</html>

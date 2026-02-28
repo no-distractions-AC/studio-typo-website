@@ -18,6 +18,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "index.html"),
         trial: resolve(__dirname, "trial.html"),
+        effectsTrial: resolve(__dirname, "effects-trial.html"),
       },
       output: {
         manualChunks: {
