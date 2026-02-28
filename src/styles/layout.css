@@ -313,7 +313,8 @@ body.scrollable {
   margin-bottom: var(--space-8);
 }
 
-.section-inner > * + * {
+.section-inner > * + *,
+.section-inner-wide > * + * {
   margin-top: var(--space-4);
 }
 

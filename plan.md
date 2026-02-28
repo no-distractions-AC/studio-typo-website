@@ -670,7 +670,7 @@ body {
         <h2>Contact</h2>
         <p>Ready to build something great?</p>
         <p>
-          Email: <a href="mailto:hello@studiotypo.com">hello@studiotypo.com</a>
+          Email: <a href="mailto:hello@studiotypo.xyz">hello@studiotypo.xyz</a>
         </p>
       </section>
     </main>

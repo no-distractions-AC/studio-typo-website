@@ -11,7 +11,7 @@ const SECTION_NAMES = {
 };
 
 // Sections that use full-width layout (no canvas interaction)
-const WIDE_SECTIONS = new Set(["about"]);
+const WIDE_SECTIONS = new Set(["services", "work", "about", "contact"]);
 
 export class PageTransition {
   constructor(headingEl, contentEl, onGoHome) {
