@@ -481,6 +481,9 @@ body.scrollable {
 /* Team photo */
 .team-photo-container {
   width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  position: relative;
   transition: transform 0.3s var(--ease-out);
   transform-origin: center center;
 }

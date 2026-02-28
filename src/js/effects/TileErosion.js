@@ -40,7 +40,7 @@ export class TileErosion extends ImageEffect {
     this.alwaysAnimate = true;
 
     this._params = {
-      tileShape: "hex",
+      tileShape: "square",
       tileSize: 14,
       gap: 0,
       erosionRadius: 160,
@@ -112,18 +112,26 @@ export class TileErosion extends ImageEffect {
 
     this._wrapper = document.createElement("div");
     this._wrapper.style.cssText =
-      "width:100%;height:100%;position:relative;overflow:hidden;background:#0f1114;";
+      "width:100%;height:100%;position:relative;overflow:hidden;background:var(--bg-primary, #0f1114);";
 
     // Text span BEHIND canvas (z-index:0) -- revealed when tiles erode
-    const text = this._displayText;
-    const fontSize = Math.min(w * (0.8 / text.length), h * 0.7);
+    const lines = this._displayText.split("\n");
+    const longest = lines.reduce((a, b) => (a.length > b.length ? a : b));
+    const fontSize = Math.min(
+      w * (0.72 / (longest.length * 0.6)),
+      (h * 0.64) / lines.length,
+    );
     this._textEl = document.createElement("span");
-    this._textEl.textContent = text;
     this._textEl.style.cssText =
-      `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;` +
+      `position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;` +
       `font-family:"Space Mono",monospace;font-weight:700;` +
-      `font-size:${fontSize.toFixed(0)}px;line-height:1;` +
+      `font-size:${fontSize.toFixed(0)}px;line-height:1.15;` +
       `color:#fff;z-index:0;pointer-events:none;`;
+    for (const line of lines) {
+      const span = document.createElement("span");
+      span.textContent = line;
+      this._textEl.appendChild(span);
+    }
     this._wrapper.appendChild(this._textEl);
 
     // Canvas for hex tiles ON TOP (z-index:1)
@@ -168,13 +176,22 @@ export class TileErosion extends ImageEffect {
     offscreen.height = h;
     const mctx = offscreen.getContext("2d");
 
-    const text = this._displayText;
-    const fontSize = Math.min(w * (0.8 / text.length), h * 0.7);
+    const lines = this._displayText.split("\n");
+    const longest = lines.reduce((a, b) => (a.length > b.length ? a : b));
+    const fontSize = Math.min(
+      w * (0.72 / (longest.length * 0.6)),
+      (h * 0.64) / lines.length,
+    );
     mctx.font = `700 ${fontSize}px "Space Mono", monospace`;
     mctx.textAlign = "center";
     mctx.textBaseline = "middle";
     mctx.fillStyle = "#fff";
-    mctx.fillText(text, w / 2, h / 2);
+    const lineHeight = fontSize * 1.15;
+    const totalHeight = lineHeight * lines.length;
+    const startY = h / 2 - totalHeight / 2 + lineHeight / 2;
+    for (let i = 0; i < lines.length; i++) {
+      mctx.fillText(lines[i], w / 2, startY + i * lineHeight);
+    }
 
     const maskData = mctx.getImageData(0, 0, w, h).data;
 
@@ -291,7 +308,8 @@ export class TileErosion extends ImageEffect {
         this._gapCloseFrom = this._animatedGap;
       }
       const t = Math.min((performance.now() - this._gapCloseStart) / 2000, 1);
-      const eased = 1 - (1 - t) * (1 - t) * (1 - t); // ease-out cubic
+      // ease-in-out cubic: smooth acceleration + deceleration
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       this._animatedGap = this._gapCloseFrom * (1 - eased);
       if (t >= 1) {
         this._animatedGap = 0;

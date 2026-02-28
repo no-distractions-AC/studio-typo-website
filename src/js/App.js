@@ -190,8 +190,8 @@ export class App {
     this.navigation = new Navigation(
       document.getElementById("navigation"),
       document.getElementById("controls"),
-      (section) => {
-        this.pageTransition.transitionTo(section);
+      async (section) => {
+        await this.pageTransition.transitionTo(section);
         this.navigation.setActive(section);
         analytics.trackNavigation(section);
 
@@ -243,8 +243,7 @@ export class App {
         if (this.state === STATES.MAIN) {
           const activeEl = document.activeElement;
           const isFormInput =
-            activeEl?.tagName === "INPUT" ||
-            activeEl?.tagName === "TEXTAREA";
+            activeEl?.tagName === "INPUT" || activeEl?.tagName === "TEXTAREA";
 
           if (!isFormInput) {
             const keyModel = this.keyboardLayout.getTypoKey(key);
@@ -260,8 +259,7 @@ export class App {
         if (this.state === STATES.MAIN) {
           const activeEl = document.activeElement;
           const isFormInput =
-            activeEl?.tagName === "INPUT" ||
-            activeEl?.tagName === "TEXTAREA";
+            activeEl?.tagName === "INPUT" || activeEl?.tagName === "TEXTAREA";
 
           if (!isFormInput) {
             this.audioManager.playKeyRelease(key);

@@ -7,7 +7,20 @@ const MODES = ["embers", "ghost", "neon", "datastream", "glitch"];
 
 const NEON_COLORS = ["#ff00aa", "#00ddff", "#ffcc00"];
 
-const TECH_CHARS = ["{", "}", "<", ">", "/", "\\", "|", "_", "=", ";", ":", "~"];
+const TECH_CHARS = [
+  "{",
+  "}",
+  "<",
+  ">",
+  "/",
+  "\\",
+  "|",
+  "_",
+  "=",
+  ";",
+  ":",
+  "~",
+];
 const DATA_CHARS = ["0", "1", "0", "1", "0", "1", "#", "$", "%", "&", "0x"];
 const GLITCH_CHARS = ["█", "▓", "░", "▒", "╳", "∎", "⌀", "¶", "§"];
 
@@ -181,9 +194,10 @@ export class ParticleCanvas {
 
   spawnGhost(key) {
     // Main char
-    const char = Math.random() < 0.2
-      ? TECH_CHARS[Math.floor(Math.random() * TECH_CHARS.length)]
-      : key.toUpperCase();
+    const char =
+      Math.random() < 0.2
+        ? TECH_CHARS[Math.floor(Math.random() * TECH_CHARS.length)]
+        : key.toUpperCase();
 
     this.particles.push({
       mode: "ghost",
@@ -219,7 +233,7 @@ export class ParticleCanvas {
     p.y += p.vy * dt;
     const progress = p.life / p.maxLife;
     // CRT flicker — random alpha jitter
-    p.alpha = Math.max(0, (0.6 - progress * 0.5) + (Math.random() - 0.5) * 0.15);
+    p.alpha = Math.max(0, 0.6 - progress * 0.5 + (Math.random() - 0.5) * 0.15);
     return p.life < p.maxLife;
   }
 

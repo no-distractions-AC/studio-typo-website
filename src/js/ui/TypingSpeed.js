@@ -65,9 +65,7 @@ export class TypingSpeed {
     const now = performance.now();
 
     // Prune old entries outside the window
-    this.keyTimes = this.keyTimes.filter(
-      (t) => now - t < this.windowMs,
-    );
+    this.keyTimes = this.keyTimes.filter((t) => now - t < this.windowMs);
 
     if (this.keyTimes.length < 2) {
       this.display.textContent = "0 wpm";
