@@ -10,9 +10,11 @@ import { IntroSequence } from "./intro/IntroSequence.js";
 import { Navigation } from "./ui/Navigation.js";
 import { ThemeToggle } from "./ui/ThemeToggle.js";
 import { SoundToggle } from "./ui/SoundToggle.js";
-import { PageTransition } from "./ui/PageTransition.js";
+import { ScrollController } from "./ui/PageTransition.js";
 import { TeamSection } from "./ui/TeamSection.js";
 import { ContactSection } from "./ui/ContactSection.js";
+import { ParticleCanvas } from "./ui/ParticleCanvas.js";
+import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -32,7 +34,6 @@ export const STATES = {
   READY: "ready",
   INTRO: "intro",
   MAIN: "main",
-  TRANSITIONING: "transitioning",
 };
 
 // Valid state transitions
@@ -40,8 +41,6 @@ const VALID_TRANSITIONS = {
   [STATES.LOADING]: [STATES.READY],
   [STATES.READY]: [STATES.INTRO],
   [STATES.INTRO]: [STATES.MAIN],
-  [STATES.MAIN]: [STATES.TRANSITIONING],
-  [STATES.TRANSITIONING]: [STATES.MAIN],
 };
 
 export class App {
@@ -59,8 +58,12 @@ export class App {
     this.navigation = null;
     this.themeToggle = null;
     this.soundToggle = null;
-    this.pageTransition = null;
+    this.scrollController = null;
     this.teamSection = null;
+
+    // Particle effects
+    this.particleCanvas = null;
+    this.scrollSpawner = null;
 
     // Input handlers
     this.keyboardHandler = null;
@@ -184,35 +187,37 @@ export class App {
     this.teamSection = new TeamSection();
 
     // Initialize contact section (lazy-initialized on first visit)
-    this.contactSection = new ContactSection(this.audioManager);
+    // ParticleCanvas is created later in MAIN state and passed in
+    this.contactSection = new ContactSection(this.audioManager, null);
 
-    // Initialize navigation first (needed for callback)
+    // Initialize navigation
     this.navigation = new Navigation(
       document.getElementById("navigation"),
       document.getElementById("controls"),
-      async (section) => {
-        await this.pageTransition.transitionTo(section);
-        this.navigation.setActive(section);
+      (section) => {
+        this.scrollController.scrollToSection(section);
         analytics.trackNavigation(section);
+      },
+    );
 
-        // Lazy-initialize sections on first visit
-        if (section === "about") {
+    // Initialize scroll controller
+    this.scrollController = new ScrollController({
+      headingEl: document.getElementById("site-heading"),
+      contentEl: document.getElementById("content"),
+      canvasEl: document.getElementById("canvas"),
+      onSectionChange: (sectionId) => {
+        this.navigation.setActive(sectionId);
+        analytics.trackNavigation(sectionId);
+      },
+      onSectionVisible: (sectionId) => {
+        if (sectionId === "about") {
           this.teamSection.activate();
         }
-        if (section === "contact") {
+        if (sectionId === "contact") {
           this.contactSection.activate();
         }
       },
-    );
-
-    // Initialize page transitions with go-home callback
-    this.pageTransition = new PageTransition(
-      document.getElementById("site-heading"),
-      document.getElementById("content"),
-      () => {
-        this.navigation.clearActive();
-      },
-    );
+    });
   }
 
   /**
@@ -285,6 +290,14 @@ export class App {
         }, 100);
       }
     };
+
+    // Scroll down on hero triggers intro
+    this.handleWheel = (e) => {
+      if (this.state === STATES.READY && e.deltaY > 0) {
+        this.triggerIntro("T");
+      }
+    };
+    window.addEventListener("wheel", this.handleWheel, { passive: true });
   }
 
   /**
@@ -337,9 +350,16 @@ export class App {
         break;
 
       case STATES.MAIN:
-        // Show navigation and heading
+        // Show navigation and heading, enable scrolling
         this.navigation.show();
         document.getElementById("site-heading").classList.add("visible");
+        this.scrollController.reveal();
+
+        // Start particle effects — full-screen letter canvas + scroll-driven spawning
+        this.particleCanvas = new ParticleCanvas();
+        this.contactSection.particleCanvas = this.particleCanvas;
+        this.scrollSpawner = new ScrollParticleSpawner(this.particleCanvas);
+        this.scrollSpawner.attach();
         break;
     }
   }
@@ -356,6 +376,9 @@ export class App {
     if (!this.setState(STATES.INTRO)) {
       return;
     }
+
+    // Remove wheel listener once intro starts
+    window.removeEventListener("wheel", this.handleWheel);
 
     analytics.trackIntroTriggered("click", keyLetter);
 
@@ -429,5 +452,8 @@ export class App {
     this.keyboardHandler?.detach();
     this.sceneManager?.dispose();
     this.audioManager?.dispose();
+    this.scrollController?.dispose();
+    this.scrollSpawner?.dispose();
+    this.particleCanvas?.dispose();
   }
 }

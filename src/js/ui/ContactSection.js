@@ -6,16 +6,15 @@
 import { TypingReaction } from "./TypingReaction.js";
 import { SpellCheck } from "./SpellCheck.js";
 import { TypingSpeed } from "./TypingSpeed.js";
-import { ParticleCanvas } from "./ParticleCanvas.js";
 
 export class ContactSection {
-  constructor(audioManager) {
+  constructor(audioManager, particleCanvas) {
     this.sectionEl = document.getElementById("section-contact");
     this.audioManager = audioManager || null;
+    this.particleCanvas = particleCanvas || null;
     this.typingReaction = null;
     this.spellCheck = null;
     this.typingSpeed = null;
-    this.particleCanvas = null;
     this.initialized = false;
   }
 
@@ -25,9 +24,6 @@ export class ContactSection {
 
     // Ensure audio is ready before attaching typing reaction
     await this.audioManager?.init();
-
-    // Particle canvas — full-screen letter effects
-    this.particleCanvas = new ParticleCanvas();
 
     // Typing reaction — triggers particles + audio on keystroke
     this.typingReaction = new TypingReaction(
@@ -150,7 +146,6 @@ export class ContactSection {
     this.typingReaction?.dispose();
     this.spellCheck?.dispose();
     this.typingSpeed?.dispose();
-    this.particleCanvas?.dispose();
     this.initialized = false;
   }
 }

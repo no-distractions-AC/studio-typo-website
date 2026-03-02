@@ -3,9 +3,7 @@
  * Form, textarea mirror overlay, and typo highlight animations
  */
 
-/* Center the contact section within the content area.
-   The parent .content-container.content-wide has padding: 120px 60px 60px 320px.
-   We fill the available space and center children within it. */
+/* Center the contact section within the content area. */
 #section-contact .section-inner-wide {
   max-width: none;
   display: flex;

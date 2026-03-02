@@ -5,6 +5,14 @@
 
 /* Mobile: < 768px */
 @media (max-width: 767px) {
+  .content-container {
+    padding: 0 24px 40px;
+  }
+
+  .content-section {
+    padding: var(--space-8, 2rem) 0;
+  }
+
   /* Minimal nav adjustments for mobile */
   .nav-minimal {
     bottom: 40px;

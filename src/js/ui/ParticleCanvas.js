@@ -4,6 +4,7 @@
  */
 
 const MODES = ["embers", "ghost", "neon", "datastream", "glitch"];
+const MAX_PARTICLES = 150;
 
 const NEON_COLORS = ["#ff00aa", "#00ddff", "#ffcc00"];
 
@@ -103,6 +104,7 @@ export class ParticleCanvas {
   }
 
   spawn(key) {
+    if (this.particles.length >= MAX_PARTICLES) return;
     this.readColors();
     switch (this.mode) {
       case "embers":
