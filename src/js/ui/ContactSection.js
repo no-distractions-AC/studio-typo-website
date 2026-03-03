@@ -54,23 +54,6 @@ export class ContactSection {
 
     this.initFormHandling();
     this.initLabelStates();
-    this.initEffectToggle();
-  }
-
-  initEffectToggle() {
-    const btn = document.getElementById("effect-toggle");
-    if (!btn) return;
-
-    const modes = ["embers", "ghost", "neon", "datastream", "glitch"];
-    const labels = ["Embers", "Ghost", "Neon", "Stream", "Glitch"];
-    let modeIndex = 0;
-
-    btn.textContent = labels[modeIndex];
-    btn.addEventListener("click", () => {
-      modeIndex = (modeIndex + 1) % modes.length;
-      this.particleCanvas.setMode(modes[modeIndex]);
-      btn.textContent = labels[modeIndex];
-    });
   }
 
   initFormHandling() {

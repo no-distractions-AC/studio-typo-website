@@ -104,7 +104,7 @@ export class ScrollController {
           }
         });
       },
-      { threshold: 0.1 },
+      { threshold: 0 },
     );
 
     this.sections.forEach(({ element }) => {

@@ -3,6 +3,8 @@
  * Sourced from adventuretown portfolio.
  */
 
+const base = import.meta.env.BASE_URL;
+
 export const PROJECTS = [
   {
     id: "metrics",
@@ -11,6 +13,7 @@ export const PROJECTS = [
     description:
       "A platform to measure things in your life and visualize them via a Telegram bot and web app",
     tags: ["Product", "Web Dev", "Design", "Data Visualization"],
+    image: `${base}work/metrics.webp`,
   },
   {
     id: "learn",
@@ -19,6 +22,7 @@ export const PROJECTS = [
     description:
       "An AI-powered node graph that helps you find gaps in your knowledge and go deep into any topic",
     tags: ["Solo Product", "Web Dev", "Product", "AI"],
+    image: `${base}work/learn.webp`,
   },
   {
     id: "finland-museum",
@@ -27,6 +31,7 @@ export const PROJECTS = [
     description:
       "Web-based interactive museum installations developed for museums in and around Finland",
     tags: ["Web Development", "Museum Installation"],
+    image: `${base}work/finland-museum.webp`,
   },
   {
     id: "blood-speaks",
@@ -35,6 +40,7 @@ export const PROJECTS = [
     description:
       "An immersive VR experience following Maya, who becomes a superhero with powers rooted in menstruation",
     tags: ["Development", "Game Design", "Unreal", "VR"],
+    image: `${base}work/blood-speaks.webp`,
   },
   {
     id: "chronoline",
@@ -43,6 +49,7 @@ export const PROJECTS = [
     description:
       "A trivia game that tests your knowledge of the timeline of events",
     tags: ["Solo Creator", "Game", "Unity"],
+    image: `${base}work/chronoline.webp`,
   },
   {
     id: "gamed",
@@ -50,6 +57,7 @@ export const PROJECTS = [
     year: "2020",
     description: "6 games in 6 months, created with my sister Divya Tak",
     tags: ["Development", "Game Design", "Unity", "WebGL"],
+    image: `${base}work/gamed.webp`,
   },
   {
     id: "ladyland",
@@ -58,6 +66,7 @@ export const PROJECTS = [
     description:
       "A narrative-driven game based on Rokeya Hussain's iconic 1907 story, Sultana's Dream",
     tags: ["Development", "Game Design", "Environment", "Unreal"],
+    image: `${base}work/ladyland.webp`,
   },
   {
     id: "antariksha",
@@ -66,6 +75,7 @@ export const PROJECTS = [
     description:
       "A single-player action-adventure game set in a fantasy world inspired by Indian mythology and culture",
     tags: ["Development", "Game Design", "Unreal"],
+    image: `${base}work/antariksha.webp`,
   },
   {
     id: "honeytwigs",
@@ -74,6 +84,7 @@ export const PROJECTS = [
     description:
       "A cute and cozy visual novel where you play as an employee at a tiny magical cafe conjoined with a nursery",
     tags: ["Development", "Game Design", "Unity"],
+    image: `${base}work/honeytwigs.webp`,
   },
   {
     id: "mindless-runner",
@@ -82,6 +93,7 @@ export const PROJECTS = [
     description:
       "An intense endless runner-puzzle hybrid using the stroop effect to mess with the player's mind",
     tags: ["Development", "Game Design", "Game Jam", "Unity"],
+    image: `${base}work/mindless-runner.webp`,
   },
   {
     id: "hackathon-room",
@@ -90,6 +102,7 @@ export const PROJECTS = [
     description:
       "A tool to automatically generate a room in Blender from a natural language description",
     tags: ["Tool", "3D", "AI", "Development", "Blender", "Hackathon"],
+    image: `${base}work/hackathon-room.webp`,
   },
   {
     id: "synesthesia",
@@ -98,6 +111,7 @@ export const PROJECTS = [
     description:
       "A short musical experience where environment and music are in sync, created for the Unreal WCP fellowship",
     tags: ["Video Production", "Solo Project", "Unreal"],
+    image: `${base}work/synesthesia.webp`,
   },
   {
     id: "bubble-blitz",
@@ -106,6 +120,7 @@ export const PROJECTS = [
     description:
       "Gulp bubbles tinier than you — made for Ludum Dare 44 in 48 hours",
     tags: ["Solo Creator", "Game", "Unity", "Game Jam"],
+    image: `${base}work/bubble-blitz.webp`,
   },
   {
     id: "econagri",
@@ -114,6 +129,7 @@ export const PROJECTS = [
     description:
       "A tile-based city building game where you balance economic and ecological sustainability",
     tags: ["Development", "Game", "Unity"],
+    image: `${base}work/econagri.webp`,
   },
   {
     id: "tarq",
@@ -122,6 +138,7 @@ export const PROJECTS = [
     description:
       "A web-based AR experience to explore the gallery space of TARQ, a contemporary art gallery in Mumbai",
     tags: ["Web Dev", "AR", "Museum Installation"],
+    image: `${base}work/tarq.webp`,
   },
   {
     id: "futurecapture",
@@ -130,6 +147,7 @@ export const PROJECTS = [
     description:
       "A participatory installation that captures your face and creates a new identity in a collective virtual world",
     tags: ["Development", "Museum Installation", "Unity"],
+    image: `${base}work/futurecapture.webp`,
   },
   {
     id: "incommon",
@@ -138,6 +156,7 @@ export const PROJECTS = [
     description:
       "A VR experience where the environment becomes part of the stories people share from separate physical locations",
     tags: ["Development", "VR", "Unreal"],
+    image: `${base}work/incommon.webp`,
   },
   {
     id: "qslayers",
@@ -146,6 +165,7 @@ export const PROJECTS = [
     description:
       "A 2D turn-based strategy game where you defeat monsters by answering questions",
     tags: ["Development", "Game Design"],
+    image: `${base}work/qslayers.webp`,
   },
   {
     id: "the-poll",
@@ -154,6 +174,7 @@ export const PROJECTS = [
     description:
       "Digitization of the board game 'The Poll' — a multiplayer game simulating Indian General Elections",
     tags: ["Development", "Multiplayer", "Game", "Unity"],
+    image: `${base}work/the-poll.webp`,
   },
   {
     id: "civic-game-lab",
@@ -162,5 +183,6 @@ export const PROJECTS = [
     description:
       "Games for social change that promote civic values by telling South Asia's story through play",
     tags: ["Development", "Game", "Unity"],
+    image: `${base}work/civic-game-lab.webp`,
   },
 ];

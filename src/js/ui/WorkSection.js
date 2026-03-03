@@ -1,17 +1,17 @@
 /**
- * TeamSection - Manages the "Who Are We" team showcase.
- * Vertical scroll layout: one member per ~80vh area,
+ * WorkSection - Manages the "Selected Work" section.
+ * Vertical scroll layout: one project per ~80vh area,
  * image on LEFT with TileErosion, details on RIGHT.
  * Scroll-driven focus controls TileErosion erosion level.
  */
 
-import { TEAM } from "../data/team.js";
+import { PROJECTS } from "../data/projects.js";
 import { createEffect } from "../effects/index.js";
 import { ScrollFocusController } from "./ScrollFocusController.js";
 
-export class TeamSection {
+export class WorkSection {
   constructor() {
-    this.sectionEl = document.getElementById("section-about");
+    this.sectionEl = document.getElementById("section-work");
     this.effects = [];
     this.scrollController = null;
     this.createObserver = null;
@@ -30,41 +30,48 @@ export class TeamSection {
     const inner = this.sectionEl.querySelector(".section-inner-wide");
     if (!inner) return;
 
+    // Remove static work-grid if present
+    const oldGrid = inner.querySelector(".work-grid");
+    if (oldGrid) oldGrid.remove();
+
     const scrollLayout = document.createElement("div");
-    scrollLayout.className = "team-scroll-layout";
+    scrollLayout.className = "work-scroll-layout";
 
     const focusItems = [];
 
-    for (const member of TEAM) {
+    for (const project of PROJECTS) {
+      if (!project.image) continue;
+
       const item = document.createElement("div");
-      item.className = "team-scroll-item";
-      item.dataset.memberId = member.id;
+      item.className = "work-scroll-item";
+      item.dataset.projectId = project.id;
 
       // Left: image container
       const imageCol = document.createElement("div");
-      imageCol.className = "team-scroll-image";
+      imageCol.className = "work-scroll-image";
 
       const imgContainer = document.createElement("div");
-      imgContainer.className = "team-photo-container";
+      imgContainer.className = "work-photo-container";
       imageCol.appendChild(imgContainer);
 
       // Right: details
       const detailsCol = document.createElement("div");
-      detailsCol.className = "team-scroll-details";
+      detailsCol.className = "work-scroll-details";
       detailsCol.innerHTML = `
-        <span class="team-name-label">${member.name}</span>
-        <span class="team-role">${member.role}</span>
-        <p class="team-bio-text">${member.detail}</p>
+        <span class="work-year">${project.year}</span>
+        <h3 class="work-title">${project.title}</h3>
+        <p class="work-desc">${project.description}</p>
+        <div class="work-tags">${project.tags.join(" · ")}</div>
       `;
 
       item.appendChild(imageCol);
       item.appendChild(detailsCol);
       scrollLayout.appendChild(item);
 
-      this._effectMap.set(member.id, {
+      this._effectMap.set(project.id, {
         container: imgContainer,
-        photo: member.photo,
-        displayText: `${member.name}\n${member.role}`,
+        image: project.image,
+        displayText: project.title.toUpperCase(),
         effect: null,
         item,
         detailsCol,
@@ -73,7 +80,7 @@ export class TeamSection {
       focusItems.push({
         element: item,
         onUpdate: (focusProgress) => {
-          this._onFocusUpdate(member.id, focusProgress);
+          this._onFocusUpdate(project.id, focusProgress);
         },
       });
     }
@@ -84,7 +91,7 @@ export class TeamSection {
     this.scrollController = new ScrollFocusController(focusItems);
     this.scrollController.attach();
 
-    // Lazy-create effects, then pause/resume for performance
+    // Lazy-create effects on first intersection, then pause/resume for performance
     this._setupObservers();
   }
 
@@ -94,9 +101,9 @@ export class TeamSection {
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          const memberId = entry.target.dataset.memberId;
-          if (!memberId) continue;
-          this._initEffect(memberId);
+          const projectId = entry.target.dataset.projectId;
+          if (!projectId) continue;
+          this._initEffect(projectId);
           this.createObserver.unobserve(entry.target);
         }
       },
@@ -107,9 +114,9 @@ export class TeamSection {
     this.visibilityObserver = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          const memberId = entry.target.dataset.memberId;
-          if (!memberId) continue;
-          const data = this._effectMap.get(memberId);
+          const projectId = entry.target.dataset.projectId;
+          if (!projectId) continue;
+          const data = this._effectMap.get(projectId);
           if (!data?.effect) continue;
 
           if (entry.isIntersecting) {
@@ -128,8 +135,8 @@ export class TeamSection {
     }
   }
 
-  async _initEffect(memberId) {
-    const data = this._effectMap.get(memberId);
+  async _initEffect(projectId) {
+    const data = this._effectMap.get(projectId);
     if (!data || data.effect) return;
 
     const isDark = document.documentElement.dataset.theme !== "light";
@@ -137,7 +144,7 @@ export class TeamSection {
       const effect = await createEffect(
         "tileErosion",
         data.container,
-        data.photo,
+        data.image,
         { theme: isDark ? "dark" : "light", displayText: data.displayText },
       );
       effect.setParam("showText", true);
@@ -160,15 +167,14 @@ export class TeamSection {
       data.effect = effect;
       this.effects.push(effect);
     } catch (err) {
-      console.warn("Failed to init team effect:", err);
+      console.warn(`Failed to init work effect for ${projectId}:`, err);
     }
   }
 
-  _onFocusUpdate(memberId, focusProgress) {
-    const data = this._effectMap.get(memberId);
+  _onFocusUpdate(projectId, focusProgress) {
+    const data = this._effectMap.get(projectId);
     if (!data) return;
 
-    // Drive TileErosion: focusProgress 1 = centered = assembled (level 0)
     if (data.effect) {
       data.effect.setErosionLevel(1 - focusProgress);
     }

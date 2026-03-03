@@ -320,6 +320,18 @@ export class ImageEffect {
     animate();
   }
 
+  pause() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+  }
+
+  resume() {
+    if (this.isDisposed || this.animationId) return;
+    this._startLoop();
+  }
+
   dispose() {
     this.isDisposed = true;
     if (this.animationId) cancelAnimationFrame(this.animationId);

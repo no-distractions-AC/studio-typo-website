@@ -12,6 +12,7 @@
 
 import { ImageEffect } from "./ImageEffect.js";
 import { getPixelRatio } from "../utils/device.js";
+import { noise2D } from "../ascii/noise.js";
 
 const TWO_PI = Math.PI * 2;
 
@@ -50,15 +51,27 @@ export class TileErosion extends ImageEffect {
       rotation: 0.04,
       shockForce: 20,
       shockSpeed: 250,
+      noiseAmp: 0,
+      noiseScale: 0.02,
+      noiseSpeed: 0.35,
+      renderMode: "image",
+      showText: true,
+      maskMode: "text",
+      edgeMode: "text",
+      baseOpacity: 1,
+      overlayColor: null,
     };
 
-    this._displayText = "TYPO";
+    this._displayText = options.displayText || "TYPO";
     this._wrapper = null;
     this._textEl = null;
     this._canvas = null;
     this._ctx = null;
     this._img = null;
+    this._imgEl = null;
     this._tiles = [];
+    this._gridW = 0;
+    this._gridH = 0;
     this._dpr = getPixelRatio(2);
     this._revealed = false;
     this._shockwaves = [];
@@ -73,6 +86,15 @@ export class TileErosion extends ImageEffect {
     this._cropY = 0;
     this._drawW = 0;
     this._drawH = 0;
+
+    // Programmatic erosion level (null = use mouse, 0-1 = scroll-driven)
+    this._erosionLevel = null;
+
+    // Canvas bleed margin for tiles escaping the container
+    this._bleed = 0;
+
+    this._overlayColor = null;
+    this._resolveOverlayColor();
   }
 
   async init() {
@@ -103,6 +125,9 @@ export class TileErosion extends ImageEffect {
         this._tagEdgeTiles();
       }, 100);
     }
+    if (key === "overlayColor") {
+      this._overlayColor = value;
+    }
     this._needsRender = true;
   }
 
@@ -112,34 +137,47 @@ export class TileErosion extends ImageEffect {
 
     this._wrapper = document.createElement("div");
     this._wrapper.style.cssText =
-      "width:100%;height:100%;position:relative;overflow:hidden;background:var(--bg-primary, #0f1114);";
+      "width:100%;height:100%;position:relative;background:var(--bg-primary, #0f1114);";
 
-    // Text span BEHIND canvas (z-index:0) -- revealed when tiles erode
-    const lines = this._displayText.split("\n");
-    const longest = lines.reduce((a, b) => (a.length > b.length ? a : b));
-    const fontSize = Math.min(
-      w * (0.72 / (longest.length * 0.6)),
-      (h * 0.64) / lines.length,
-    );
-    this._textEl = document.createElement("span");
-    this._textEl.style.cssText =
-      `position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;` +
-      `font-family:"Space Mono",monospace;font-weight:700;` +
-      `font-size:${fontSize.toFixed(0)}px;line-height:1.15;` +
-      `color:#fff;z-index:0;pointer-events:none;`;
-    for (const line of lines) {
-      const span = document.createElement("span");
-      span.textContent = line;
-      this._textEl.appendChild(span);
+    this._imgEl = this._img;
+    this._imgEl.style.cssText =
+      "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;";
+    this._wrapper.appendChild(this._imgEl);
+
+    if (this._params.showText && this._displayText.trim().length > 0) {
+      const isDark = this.options.theme !== "light";
+      const textColor = isDark ? "#f5f6f7" : "#0d0f12";
+      // Text span ABOVE image (z-index:1)
+      const lines = this._displayText.split("\n");
+      const longest = lines.reduce((a, b) => (a.length > b.length ? a : b));
+      const fontSize = Math.min(
+        w * (0.72 / (longest.length * 0.6)),
+        (h * 0.64) / lines.length,
+      );
+      this._textEl = document.createElement("span");
+      this._textEl.style.cssText =
+        `position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;` +
+        `font-family:"Space Mono",monospace;font-weight:700;` +
+        `font-size:${fontSize.toFixed(0)}px;line-height:1.15;` +
+        `color:${textColor};z-index:1;pointer-events:none;`;
+      for (const line of lines) {
+        const span = document.createElement("span");
+        span.textContent = line;
+        this._textEl.appendChild(span);
+      }
+      this._wrapper.appendChild(this._textEl);
     }
-    this._wrapper.appendChild(this._textEl);
 
-    // Canvas for hex tiles ON TOP (z-index:1)
+    // Canvas for hex tiles ON TOP (z-index:2) — oversized for tile overflow
+    const bleed = Math.max(w, h) * 0.25;
+    this._bleed = bleed;
     this._canvas = document.createElement("canvas");
     this._canvas.style.cssText =
-      "position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none;";
-    this._canvas.width = w * this._dpr;
-    this._canvas.height = h * this._dpr;
+      `position:absolute;left:${-bleed}px;top:${-bleed}px;` +
+      `width:${w + bleed * 2}px;height:${h + bleed * 2}px;` +
+      `display:block;z-index:2;pointer-events:none;`;
+    this._canvas.width = (w + bleed * 2) * this._dpr;
+    this._canvas.height = (h + bleed * 2) * this._dpr;
     this._ctx = this._canvas.getContext("2d");
     this._ctx.setTransform(this._dpr, 0, 0, this._dpr, 0, 0);
     this._wrapper.appendChild(this._canvas);
@@ -169,31 +207,40 @@ export class TileErosion extends ImageEffect {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
     if (w === 0 || h === 0) return;
+    this._gridW = w;
+    this._gridH = h;
 
-    // Build text mask (for edge detection)
-    const offscreen = document.createElement("canvas");
-    offscreen.width = w;
-    offscreen.height = h;
-    const mctx = offscreen.getContext("2d");
+    let maskData = null;
+    const useTextMask =
+      this._params.maskMode === "text" &&
+      this._params.showText &&
+      this._displayText.trim().length > 0;
+    if (useTextMask) {
+      // Build text mask (for edge detection)
+      const offscreen = document.createElement("canvas");
+      offscreen.width = w;
+      offscreen.height = h;
+      const mctx = offscreen.getContext("2d");
 
-    const lines = this._displayText.split("\n");
-    const longest = lines.reduce((a, b) => (a.length > b.length ? a : b));
-    const fontSize = Math.min(
-      w * (0.72 / (longest.length * 0.6)),
-      (h * 0.64) / lines.length,
-    );
-    mctx.font = `700 ${fontSize}px "Space Mono", monospace`;
-    mctx.textAlign = "center";
-    mctx.textBaseline = "middle";
-    mctx.fillStyle = "#fff";
-    const lineHeight = fontSize * 1.15;
-    const totalHeight = lineHeight * lines.length;
-    const startY = h / 2 - totalHeight / 2 + lineHeight / 2;
-    for (let i = 0; i < lines.length; i++) {
-      mctx.fillText(lines[i], w / 2, startY + i * lineHeight);
+      const lines = this._displayText.split("\n");
+      const longest = lines.reduce((a, b) => (a.length > b.length ? a : b));
+      const fontSize = Math.min(
+        w * (0.72 / (longest.length * 0.6)),
+        (h * 0.64) / lines.length,
+      );
+      mctx.font = `700 ${fontSize}px "Space Mono", monospace`;
+      mctx.textAlign = "center";
+      mctx.textBaseline = "middle";
+      mctx.fillStyle = "#fff";
+      const lineHeight = fontSize * 1.15;
+      const totalHeight = lineHeight * lines.length;
+      const startY = h / 2 - totalHeight / 2 + lineHeight / 2;
+      for (let i = 0; i < lines.length; i++) {
+        mctx.fillText(lines[i], w / 2, startY + i * lineHeight);
+      }
+
+      maskData = mctx.getImageData(0, 0, w, h).data;
     }
-
-    const maskData = mctx.getImageData(0, 0, w, h).data;
 
     // Build tile grid at gap=0 (gap is animated dynamically)
     const ts = this._params.tileSize;
@@ -215,12 +262,26 @@ export class TileErosion extends ImageEffect {
 
         const px = Math.round(Math.min(Math.max(cx, 0), w - 1));
         const py = Math.round(Math.min(Math.max(cy, 0), h - 1));
-        const inText = maskData[(py * w + px) * 4 + 3] > 128;
+        const inText = maskData
+          ? maskData[(py * w + px) * 4 + 3] > 128
+          : true;
 
-        const srcX = ((cx - this._cropX) / this._drawW) * this._img.width;
-        const srcY = ((cy - this._cropY) / this._drawH) * this._img.height;
-        const srcW = (ts / this._drawW) * this._img.width;
-        const srcH = (ts / this._drawH) * this._img.height;
+        const srcX =
+          this._params.renderMode === "image"
+            ? ((cx - this._cropX) / this._drawW) * this._img.width
+            : 0;
+        const srcY =
+          this._params.renderMode === "image"
+            ? ((cy - this._cropY) / this._drawH) * this._img.height
+            : 0;
+        const srcW =
+          this._params.renderMode === "image"
+            ? (ts / this._drawW) * this._img.width
+            : 0;
+        const srcH =
+          this._params.renderMode === "image"
+            ? (ts / this._drawH) * this._img.height
+            : 0;
 
         this._tiles.push({
           cx,
@@ -250,6 +311,23 @@ export class TileErosion extends ImageEffect {
 
   _tagEdgeTiles() {
     const ts = this._params.tileSize;
+
+    if (this._params.edgeMode === "all") {
+      for (const tile of this._tiles) {
+        tile.isEdge = true;
+      }
+      return;
+    }
+
+    if (this._params.edgeMode === "perimeter") {
+      const w = this._gridW;
+      const h = this._gridH;
+      for (const tile of this._tiles) {
+        tile.isEdge =
+          tile.cx < ts || tile.cx > w - ts || tile.cy < ts || tile.cy > h - ts;
+      }
+      return;
+    }
 
     const inTextSet = new Set();
     for (const tile of this._tiles) {
@@ -292,6 +370,11 @@ export class TileErosion extends ImageEffect {
       rotation,
       shockForce,
       shockSpeed,
+      noiseAmp,
+      noiseScale,
+      noiseSpeed,
+      renderMode,
+      baseOpacity,
       tileSize: ts,
       tileShape: shape,
       gap: targetGap,
@@ -319,8 +402,8 @@ export class TileErosion extends ImageEffect {
       this._animatedGap = 0;
     }
 
-    // Scale factor: tiles expand symmetrically from container center
-    const gapScale = ts > 0 ? (ts + this._animatedGap) / ts : 1;
+    // Base gap scale (hover-driven only; scroll gap is per-tile for organic breakup)
+    const baseGapScale = ts > 0 ? (ts + this._animatedGap) / ts : 1;
     const centerX = w / 2;
     const centerY = h / 2;
 
@@ -337,14 +420,51 @@ export class TileErosion extends ImageEffect {
     // Update tiles
     const ctx = this._ctx;
     const halfTs = ts / 2;
-    ctx.clearRect(0, 0, w, h);
+    const bleed = this._bleed;
+    ctx.clearRect(0, 0, w + bleed * 2, h + bleed * 2);
 
     for (const tile of this._tiles) {
-      // Scale gap=0 position outward from center
-      const renderCx = centerX + (tile.cx - centerX) * gapScale;
-      const renderCy = centerY + (tile.cy - centerY) * gapScale;
+      // Uniform gap expansion during scroll erosion (per-tile variation comes from edge drift only)
+      const tileExpand =
+        this._erosionLevel !== null ? this._erosionLevel * 0.12 : 0;
+      const tileGapScale = baseGapScale + tileExpand;
+      const renderCx = centerX + (tile.cx - centerX) * tileGapScale;
+      const renderCy = centerY + (tile.cy - centerY) * tileGapScale;
 
-      if (this._revealed) {
+      // Programmatic scroll-driven erosion with physics-like acceleration
+      if (this._erosionLevel !== null) {
+        const level = this._erosionLevel;
+        const accel = level * level; // quadratic — barely moves near center, accelerates away
+
+        if (tile.isEdge) {
+          const angle = tile.jitterAngle;
+          const f = driftForce * 1.0 * accel * tile.strengthMult;
+          tile.targetX = Math.cos(angle) * f;
+          tile.targetY =
+            Math.sin(angle) * f + gravity * driftForce * 1.0 * accel;
+          tile.targetRotation = f * rotation * 1.5 * tile.jitterAngle;
+          tile.targetOpacity = Math.min(baseOpacity * (0.2 + accel), 1);
+          tile.targetScale = 1 - accel * 0.2;
+        } else {
+          // Inner tiles stay put — only edge tiles break away
+          tile.targetX = 0;
+          tile.targetY = 0;
+          tile.targetOpacity = Math.min(baseOpacity * 0.25, 1);
+          tile.targetScale = 1;
+          tile.targetRotation = 0;
+        }
+
+        if (noiseAmp > 0 && !this.reducedMotion) {
+          const t = ((now - this._startTime) * 0.001) * noiseSpeed;
+          const nx = noise2D(tile.cx * noiseScale + t, tile.cy * noiseScale + t);
+          const ny = noise2D(
+            tile.cx * noiseScale + t + 100,
+            tile.cy * noiseScale + t + 100,
+          );
+          tile.targetX += nx * noiseAmp * accel;
+          tile.targetY += ny * noiseAmp * accel;
+        }
+      } else if (this._revealed) {
         tile.targetOpacity = 0;
         tile.targetScale = 0;
         tile.targetX = 0;
@@ -371,7 +491,7 @@ export class TileErosion extends ImageEffect {
         if (dist < erosionRadius) {
           if (tile.isEdge) {
             const falloff = 1 - dist / erosionRadius;
-            tile.targetOpacity = (1 - falloff) * 0.9;
+            tile.targetOpacity = baseOpacity * (0.2 + (1 - falloff));
             tile.targetScale = 0.5 + (1 - falloff) * 0.5;
 
             const angle = Math.atan2(dy, dx) + tile.jitterAngle;
@@ -381,21 +501,21 @@ export class TileErosion extends ImageEffect {
             tile.targetRotation = f * rotation * tile.jitterAngle;
           } else {
             const falloff = 1 - dist / erosionRadius;
-            tile.targetOpacity = 1 - falloff;
+            tile.targetOpacity = baseOpacity * (1 - falloff);
             tile.targetScale = 1 - falloff * 0.5;
             tile.targetX = 0;
             tile.targetY = 0;
             tile.targetRotation = 0;
           }
         } else {
-          tile.targetOpacity = 1;
+          tile.targetOpacity = baseOpacity;
           tile.targetScale = 1;
           tile.targetX = 0;
           tile.targetY = 0;
           tile.targetRotation = 0;
         }
       } else {
-        tile.targetOpacity = 1;
+        tile.targetOpacity = baseOpacity;
         tile.targetScale = 1;
         tile.targetX = 0;
         tile.targetY = 0;
@@ -430,10 +550,13 @@ export class TileErosion extends ImageEffect {
 
       if (tile.opacity < 0.01) continue;
 
-      // Draw tile at render position
+      // Draw tile at render position (offset by bleed for oversized canvas)
       ctx.save();
       ctx.globalAlpha = tile.opacity;
-      ctx.translate(renderCx + tile.offsetX, renderCy + tile.offsetY);
+      ctx.translate(
+        renderCx + tile.offsetX + bleed,
+        renderCy + tile.offsetY + bleed,
+      );
       ctx.rotate(tile.rotation);
       ctx.scale(tile.scale, tile.scale);
 
@@ -455,19 +578,33 @@ export class TileErosion extends ImageEffect {
       }
       // square: no clip needed
 
-      ctx.drawImage(
-        this._img,
-        tile.srcX,
-        tile.srcY,
-        tile.srcW,
-        tile.srcH,
-        -halfTs,
-        -halfTs,
-        ts,
-        ts,
-      );
+      if (renderMode === "image") {
+        ctx.drawImage(
+          this._img,
+          tile.srcX,
+          tile.srcY,
+          tile.srcW,
+          tile.srcH,
+          -halfTs,
+          -halfTs,
+          ts,
+          ts,
+        );
+      } else {
+        ctx.fillStyle = this._overlayColor || "rgba(255,255,255,0.12)";
+        ctx.fillRect(-halfTs, -halfTs, ts, ts);
+      }
       ctx.restore();
     }
+  }
+
+  /**
+   * Set programmatic erosion level (0 = assembled, 1 = scattered).
+   * When set (not null), overrides mouse-hover erosion logic.
+   */
+  setErosionLevel(level) {
+    this._erosionLevel = level;
+    this._needsRender = true;
   }
 
   setDisplayText(text) {
@@ -476,6 +613,30 @@ export class TileErosion extends ImageEffect {
     this._buildDOM();
     this._buildTileGrid();
     this._tagEdgeTiles();
+  }
+
+  _resolveOverlayColor() {
+    if (this._params.overlayColor) {
+      this._overlayColor = this._params.overlayColor;
+      return;
+    }
+    const isDark = this.options.theme !== "light";
+    this._overlayColor = isDark
+      ? "rgba(255,255,255,0.12)"
+      : "rgba(0,0,0,0.12)";
+  }
+
+  onThemeChange(isDark) {
+    if (this._params.overlayColor) {
+      this._overlayColor = this._params.overlayColor;
+    } else {
+      this._overlayColor = isDark
+        ? "rgba(255,255,255,0.12)"
+        : "rgba(0,0,0,0.12)";
+    }
+    if (this._textEl) {
+      this._textEl.style.color = isDark ? "#f5f6f7" : "#0d0f12";
+    }
   }
 
   triggerShockwave(x, y) {
@@ -491,8 +652,14 @@ export class TileErosion extends ImageEffect {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
     if (w === 0 || h === 0) return;
-    this._canvas.width = w * this._dpr;
-    this._canvas.height = h * this._dpr;
+    const bleed = Math.max(w, h) * 0.25;
+    this._bleed = bleed;
+    this._canvas.style.left = `${-bleed}px`;
+    this._canvas.style.top = `${-bleed}px`;
+    this._canvas.style.width = `${w + bleed * 2}px`;
+    this._canvas.style.height = `${h + bleed * 2}px`;
+    this._canvas.width = (w + bleed * 2) * this._dpr;
+    this._canvas.height = (h + bleed * 2) * this._dpr;
     this._ctx.setTransform(this._dpr, 0, 0, this._dpr, 0, 0);
     this._computeCover(w, h);
     this._buildTileGrid();
@@ -504,6 +671,7 @@ export class TileErosion extends ImageEffect {
     this._tiles = [];
     this._shockwaves = [];
     this._img = null;
+    this._imgEl = null;
     this._ctx = null;
     this._wrapper?.remove();
     super.dispose();

@@ -12,6 +12,7 @@ import { ThemeToggle } from "./ui/ThemeToggle.js";
 import { SoundToggle } from "./ui/SoundToggle.js";
 import { ScrollController } from "./ui/PageTransition.js";
 import { TeamSection } from "./ui/TeamSection.js";
+import { WorkSection } from "./ui/WorkSection.js";
 import { ContactSection } from "./ui/ContactSection.js";
 import { ParticleCanvas } from "./ui/ParticleCanvas.js";
 import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
@@ -186,6 +187,9 @@ export class App {
     // Initialize team section (lazy-initialized on first visit)
     this.teamSection = new TeamSection();
 
+    // Initialize work section (lazy-initialized on first visit)
+    this.workSection = new WorkSection();
+
     // Initialize contact section (lazy-initialized on first visit)
     // ParticleCanvas is created later in MAIN state and passed in
     this.contactSection = new ContactSection(this.audioManager, null);
@@ -210,6 +214,9 @@ export class App {
         analytics.trackNavigation(sectionId);
       },
       onSectionVisible: (sectionId) => {
+        if (sectionId === "work") {
+          this.workSection.activate();
+        }
         if (sectionId === "about") {
           this.teamSection.activate();
         }
