@@ -4,7 +4,7 @@
  */
 
 import { TypingReaction } from "./TypingReaction.js";
-import { SpellCheck } from "./SpellCheck.js";
+
 import { TypingSpeed } from "./TypingSpeed.js";
 
 export class ContactSection {
@@ -13,7 +13,6 @@ export class ContactSection {
     this.audioManager = audioManager || null;
     this.particleCanvas = particleCanvas || null;
     this.typingReaction = null;
-    this.spellCheck = null;
     this.typingSpeed = null;
     this.initialized = false;
   }
@@ -33,14 +32,6 @@ export class ContactSection {
     );
     this.typingReaction.init();
     this.typingReaction.attach();
-
-    // Spell check — mirror overlay on the message textarea
-    const textarea = document.getElementById("contact-message");
-    const mirror = document.getElementById("contact-message-mirror");
-    if (textarea && mirror) {
-      this.spellCheck = new SpellCheck(textarea, mirror);
-      this.spellCheck.attach();
-    }
 
     // Typing speed — WPM display
     const speedEl = document.getElementById("typing-speed");
@@ -112,11 +103,6 @@ export class ContactSection {
         submitBtn.querySelector(".submit-text").classList.remove("hidden");
         form.reset();
 
-        // Clear spell check mirror
-        if (this.spellCheck) {
-          document.getElementById("contact-message-mirror").innerHTML = "";
-        }
-
         // Reset label states
         this.sectionEl.querySelectorAll(".form-label").forEach((label) => {
           label.classList.remove("active");
@@ -127,7 +113,6 @@ export class ContactSection {
 
   dispose() {
     this.typingReaction?.dispose();
-    this.spellCheck?.dispose();
     this.typingSpeed?.dispose();
     this.initialized = false;
   }
