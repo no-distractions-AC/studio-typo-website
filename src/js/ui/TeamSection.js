@@ -1,21 +1,15 @@
 /**
  * TeamSection - Manages the "Who Are We" team showcase.
- * Vertical scroll layout: one member per ~80vh area,
- * image on LEFT with TileErosion, details on RIGHT.
- * Scroll-driven focus controls TileErosion erosion level.
+ * Compact 3-column grid with TileErosion effects on each photo.
  */
 
 import { TEAM } from "../data/team.js";
 import { createEffect } from "../effects/index.js";
-import { ScrollFocusController } from "./ScrollFocusController.js";
 
 export class TeamSection {
   constructor() {
     this.sectionEl = document.getElementById("section-about");
     this.effects = [];
-    this.scrollController = null;
-    this.createObserver = null;
-    this.visibilityObserver = null;
     this.initialized = false;
     this._effectMap = new Map();
   }
@@ -30,101 +24,41 @@ export class TeamSection {
     const inner = this.sectionEl.querySelector(".section-inner-wide");
     if (!inner) return;
 
-    const scrollLayout = document.createElement("div");
-    scrollLayout.className = "team-scroll-layout";
-
-    const focusItems = [];
+    const grid = document.createElement("div");
+    grid.className = "team-grid";
 
     for (const member of TEAM) {
       const item = document.createElement("div");
-      item.className = "team-scroll-item";
+      item.className = "team-grid-item";
       item.dataset.memberId = member.id;
-
-      // Left: image container
-      const imageCol = document.createElement("div");
-      imageCol.className = "team-scroll-image";
 
       const imgContainer = document.createElement("div");
       imgContainer.className = "team-photo-container";
-      imageCol.appendChild(imgContainer);
 
-      // Right: details
-      const detailsCol = document.createElement("div");
-      detailsCol.className = "team-scroll-details";
-      detailsCol.innerHTML = `
+      const details = document.createElement("div");
+      details.className = "team-grid-details";
+      details.innerHTML = `
         <span class="team-name-label">${member.name}</span>
         <span class="team-role">${member.role}</span>
-        <p class="team-bio-text">${member.detail}</p>
       `;
 
-      item.appendChild(imageCol);
-      item.appendChild(detailsCol);
-      scrollLayout.appendChild(item);
+      item.appendChild(imgContainer);
+      item.appendChild(details);
+      grid.appendChild(item);
 
       this._effectMap.set(member.id, {
         container: imgContainer,
         photo: member.photo,
         displayText: `${member.name}\n${member.role}`,
         effect: null,
-        item,
-        detailsCol,
-      });
-
-      focusItems.push({
-        element: item,
-        onUpdate: (focusProgress) => {
-          this._onFocusUpdate(member.id, focusProgress);
-        },
       });
     }
 
-    inner.appendChild(scrollLayout);
+    inner.appendChild(grid);
 
-    // Set up scroll focus controller
-    this.scrollController = new ScrollFocusController(focusItems);
-    this.scrollController.attach();
-
-    // Lazy-create effects, then pause/resume for performance
-    this._setupObservers();
-  }
-
-  _setupObservers() {
-    // Observer 1: Create effect on first intersection (one-time)
-    this.createObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const memberId = entry.target.dataset.memberId;
-          if (!memberId) continue;
-          this._initEffect(memberId);
-          this.createObserver.unobserve(entry.target);
-        }
-      },
-      { rootMargin: "200px" },
-    );
-
-    // Observer 2: Pause/resume effects based on viewport proximity
-    this.visibilityObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const memberId = entry.target.dataset.memberId;
-          if (!memberId) continue;
-          const data = this._effectMap.get(memberId);
-          if (!data?.effect) continue;
-
-          if (entry.isIntersecting) {
-            data.effect.resume();
-          } else {
-            data.effect.pause();
-          }
-        }
-      },
-      { rootMargin: "100px" },
-    );
-
-    for (const [, data] of this._effectMap) {
-      this.createObserver.observe(data.item);
-      this.visibilityObserver.observe(data.item);
+    // Init all 3 effects immediately (only 3, not heavy)
+    for (const [memberId] of this._effectMap) {
+      this._initEffect(memberId);
     }
   }
 
@@ -156,7 +90,7 @@ export class TeamSection {
       effect.setParam("noiseAmp", 2);
       effect.setParam("noiseScale", 0.02);
       effect.setParam("noiseSpeed", 0.35);
-      effect.setErosionLevel(1);
+      effect.setErosionLevel(0);
       data.effect = effect;
       this.effects.push(effect);
     } catch (err) {
@@ -164,24 +98,7 @@ export class TeamSection {
     }
   }
 
-  _onFocusUpdate(memberId, focusProgress) {
-    const data = this._effectMap.get(memberId);
-    if (!data) return;
-
-    // Drive TileErosion: focusProgress 1 = centered = assembled (level 0)
-    if (data.effect) {
-      data.effect.setErosionLevel(1 - focusProgress);
-    }
-
-    // Base opacity 0.3 so details are always partially visible
-    data.detailsCol.style.opacity = 0.3 + focusProgress * 0.7;
-    data.detailsCol.style.transform = `translateX(${(1 - focusProgress) * 10}px)`;
-  }
-
   dispose() {
-    this.scrollController?.dispose();
-    this.createObserver?.disconnect();
-    this.visibilityObserver?.disconnect();
     for (const effect of this.effects) {
       effect.dispose();
     }

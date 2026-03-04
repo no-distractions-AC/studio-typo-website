@@ -186,3 +186,12 @@ export const PROJECTS = [
     image: `${base}work/civic-game-lab.webp`,
   },
 ];
+
+export const WORK_CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "games", label: "Games", matchTags: ["Game", "Game Design", "Game Jam"] },
+  { id: "web", label: "Web", matchTags: ["Web Dev", "Web Development", "Product", "Solo Product"] },
+  { id: "xr", label: "XR", matchTags: ["VR", "AR"] },
+  { id: "installations", label: "Installations", matchTags: ["Museum Installation"] },
+  { id: "ai-tools", label: "AI & Tools", matchTags: ["AI", "Tool"] },
+];

@@ -15,7 +15,6 @@
 
   /* Minimal nav adjustments for mobile */
   .nav-minimal {
-    bottom: 40px;
     left: 40px;
   }
 
@@ -55,20 +54,20 @@
     bottom: var(--space-16);
   }
 
-  /* Team & Work: stack vertically on mobile (image on top, details below) */
-  .team-scroll-item,
-  .work-scroll-item {
+  /* Team: single column on mobile */
+  .team-grid {
     grid-template-columns: 1fr;
-    min-height: auto;
-    gap: var(--space-4);
-    padding: var(--space-6) 0;
+  }
+
+  /* Work grid: 2 columns on tablet/mobile */
+  .work-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 /* Small mobile: < 480px */
 @media (max-width: 479px) {
   .nav-minimal {
-    bottom: 24px;
     left: 24px;
   }
 
@@ -80,7 +79,6 @@
 /* Tablet: 768px - 1023px */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nav-minimal {
-    bottom: 48px;
     left: 48px;
   }
 }
@@ -88,7 +86,6 @@
 /* Large Desktop: >= 1440px */
 @media (min-width: 1440px) {
   .nav-minimal {
-    bottom: 80px;
     left: 80px;
   }
 

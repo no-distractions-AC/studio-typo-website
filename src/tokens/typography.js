@@ -20,6 +20,7 @@ export const fontSizes = {
   "2xl": "1.5rem", // 24px
   "3xl": "2rem", // 32px
   "4xl": "2.5rem", // 40px
+  "6xl": "6rem", // 96px
 };
 
 // Font weights

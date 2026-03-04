@@ -221,8 +221,7 @@
     <!-- Site Heading (animates to top-left on nav click) -->
     <header id="site-heading" class="site-heading">
       <h1 class="heading-brand">
-        <span class="heading-studio">STUDIO</span>
-        <span class="heading-typo">TYPO</span>
+        <span class="heading-studio">Studio</span><span class="heading-dot">.</span><span class="heading-typo">Typo</span>
       </h1>
       <span id="section-label" class="section-label"></span>
     </header>
@@ -232,10 +231,10 @@
       <!-- Hero Spacer (gives the 3D canvas a full viewport) -->
       <div class="hero-spacer" id="hero-spacer"></div>
 
-      <!-- Services Section -->
+      <!-- About Us Section -->
       <section id="section-services" class="content-section">
         <div class="section-inner-wide">
-          <h2 class="section-title">Services</h2>
+          <h2 class="section-title">About Us</h2>
           <div class="service-grid">
             <div class="service-item">
               <h3>Web Development</h3>
@@ -265,6 +264,20 @@
         <div class="section-inner-wide">
           <h2 class="section-title">Selected Work</h2>
           <!-- Work scroll layout is built dynamically by WorkSection.js -->
+        </div>
+      </section>
+
+      <!-- Experiments Section -->
+      <section id="section-experiments" class="content-section">
+        <div class="section-inner-wide">
+          <h2 class="section-title">Experiments</h2>
+          <p class="experiments-lead">
+            Image effects lab — 22 interactive WebGL experiments exploring
+            typography, tile physics, masking, and fusion techniques.
+          </p>
+          <a href="effects-trial.html" class="experiments-cta"
+            >Explore the Lab &rarr;</a
+          >
         </div>
       </section>
 
@@ -362,8 +375,9 @@
       class="nav-minimal hidden"
       aria-label="Main navigation"
     >
-      <a href="#" class="nav-link" data-section="services">Services</a>
+      <a href="#" class="nav-link" data-section="services">About Us</a>
       <a href="#" class="nav-link" data-section="work">Work</a>
+      <a href="#" class="nav-link" data-section="experiments">Experiments</a>
       <a href="#" class="nav-link" data-section="about">Who Are We</a>
       <a href="#" class="nav-link" data-section="contact">Contact Us</a>
     </nav>

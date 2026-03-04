@@ -1,9 +1,13 @@
 /**
  * ScrollController - Orchestrates scroll-based heading animation,
- * canvas fade, section reveal, and active section tracking.
- *
- * Replaces the old click-based PageTransition.
+ * canvas fade, section reveal, active section tracking,
+ * and custom smooth scroll-snapping between sections.
  */
+
+// Configurable snap parameters
+const SNAP_DURATION = 400; // ms
+const SNAP_EASING = (t) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 export class ScrollController {
   constructor({
@@ -29,6 +33,12 @@ export class ScrollController {
     this.lazyObserver = null;
     this.handleScroll = null;
 
+    // Snap state
+    this.snapTargets = [];
+    this.currentSnapIndex = 0;
+    this.isSnapping = false;
+    this.handleWheel = null;
+
     this.init();
   }
 
@@ -42,6 +52,7 @@ export class ScrollController {
 
     // Bind scroll handler (attached later in reveal())
     this.handleScroll = this.onScroll.bind(this);
+    this.handleWheel = this._onWheel.bind(this);
 
     // Resize listener to update heroHeight
     this.handleResize = () => {
@@ -51,7 +62,7 @@ export class ScrollController {
 
     // Heading click scrolls back to top
     this.heading.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      this.snapTo(0);
     });
   }
 
@@ -71,6 +82,48 @@ export class ScrollController {
       this.heading.classList.remove("top-left");
       this.headingLocked = false;
     }
+  }
+
+  _onWheel(e) {
+    e.preventDefault();
+    if (this.isSnapping) return;
+
+    if (e.deltaY > 0 && this.currentSnapIndex < this.snapTargets.length - 1) {
+      this.snapTo(this.currentSnapIndex + 1);
+    } else if (e.deltaY < 0 && this.currentSnapIndex > 0) {
+      this.snapTo(this.currentSnapIndex - 1);
+    }
+  }
+
+  snapTo(index) {
+    if (index < 0 || index >= this.snapTargets.length) return;
+    this.isSnapping = true;
+    this.currentSnapIndex = index;
+
+    const target = this.snapTargets[index].offsetTop;
+    const start = window.scrollY;
+    const distance = target - start;
+
+    if (Math.abs(distance) < 1) {
+      this.isSnapping = false;
+      return;
+    }
+
+    const startTime = performance.now();
+
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / SNAP_DURATION, 1);
+      const eased = SNAP_EASING(progress);
+      window.scrollTo(0, start + distance * eased);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        this.isSnapping = false;
+      }
+    };
+    requestAnimationFrame(animate);
   }
 
   setupSectionObserver() {
@@ -142,18 +195,22 @@ export class ScrollController {
     this.content.classList.add("visible");
     document.body.classList.add("scrollable");
 
-    // Now attach scroll listener and set up observers
+    // Build snap targets: hero spacer + all sections
+    this.snapTargets = [
+      document.getElementById("hero-spacer"),
+      ...this.sections.map((s) => s.element),
+    ];
+
+    // Attach listeners
     window.addEventListener("scroll", this.handleScroll, { passive: true });
+    window.addEventListener("wheel", this.handleWheel, { passive: false });
     this.setupSectionObserver();
     this.setupRevealObserver();
     this.setupLazyObserver();
 
     // Auto-scroll to first content section after intro
     setTimeout(() => {
-      this.sections[0]?.element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      this.snapTo(1);
     }, 300);
   }
 
@@ -161,9 +218,11 @@ export class ScrollController {
    * Smooth scroll to a section by ID
    */
   scrollToSection(sectionId) {
-    const section = this.sections.find((s) => s.id === sectionId);
-    if (section) {
-      section.element.scrollIntoView({ behavior: "smooth", block: "start" });
+    const idx = this.snapTargets.findIndex(
+      (el) => el.id === `section-${sectionId}`,
+    );
+    if (idx !== -1) {
+      this.snapTo(idx);
     }
   }
 
@@ -176,6 +235,7 @@ export class ScrollController {
 
   dispose() {
     window.removeEventListener("scroll", this.handleScroll);
+    window.removeEventListener("wheel", this.handleWheel);
     window.removeEventListener("resize", this.handleResize);
     this.sectionObserver?.disconnect();
     this.revealObserver?.disconnect();

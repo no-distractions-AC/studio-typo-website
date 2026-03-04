@@ -8,7 +8,7 @@ export class Navigation {
     this.controlsElement = controlsElement;
     this.onNavigate = onNavigate;
 
-    this.sections = ["services", "work", "about", "contact"];
+    this.sections = ["services", "work", "experiments", "about", "contact"];
     this.navLinks = [];
 
     this.init();
