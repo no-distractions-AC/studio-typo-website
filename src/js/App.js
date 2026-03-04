@@ -39,7 +39,7 @@ export const STATES = {
 
 // Valid state transitions
 const VALID_TRANSITIONS = {
-  [STATES.LOADING]: [STATES.READY],
+  [STATES.LOADING]: [STATES.READY, STATES.MAIN],
   [STATES.READY]: [STATES.INTRO],
   [STATES.INTRO]: [STATES.MAIN],
 };
@@ -99,52 +99,30 @@ export class App {
     analytics.trackWebGLCapabilities(capabilities);
 
     try {
-      // Initialize components in parallel where possible
-      this.updateProgress(10);
-
-      // Initialize scene
+      // Hide 3D canvas (background effect disabled for now)
       const canvas = document.getElementById("canvas");
-      this.sceneManager = new SceneManager(canvas);
-      await this.sceneManager.init();
-      this.updateProgress(30);
+      canvas.style.display = "none";
 
-      // Apply saved theme BEFORE creating keyboard (so KeyModels read correct theme)
+      // Apply saved theme
       document.documentElement.setAttribute(
         "data-theme",
         getTheme(CONFIG.theme.default),
       );
 
-      // Initialize keyboard layout
-      this.keyboardLayout = new KeyboardLayout(this.sceneManager.scene);
-      await this.keyboardLayout.init();
-      this.updateProgress(50);
-
       // Initialize audio (don't start yet)
       this.audioManager = new AudioManager();
-      this.updateProgress(60);
 
       // Initialize UI components
       this.initUI();
-      this.updateProgress(70);
-
-      // Initialize intro sequence
-      this.introSequence = new IntroSequence(this);
-      this.updateProgress(80);
 
       // Set up input handlers
       this.initInputHandlers();
-      this.updateProgress(90);
-
-      // Start render loop
-      this.sceneManager.start((delta, elapsed) => {
-        this.update(delta, elapsed);
-      });
 
       this.updateProgress(100);
 
-      // Transition to READY state
+      // Jump directly to MAIN state (skip intro)
       await this.waitForProgress();
-      this.setState(STATES.READY);
+      this.setState(STATES.MAIN);
 
       // Track performance
       this.trackLoadPerformance();
@@ -258,7 +236,7 @@ export class App {
             activeEl?.tagName === "INPUT" || activeEl?.tagName === "TEXTAREA";
 
           if (!isFormInput) {
-            const keyModel = this.keyboardLayout.getTypoKey(key);
+            const keyModel = this.keyboardLayout?.getTypoKey(key);
             if (keyModel) {
               keyModel.press();
               this.audioManager.playKeyPress(key);
@@ -282,21 +260,23 @@ export class App {
 
     this.keyboardHandler.attach();
 
-    // Click handler for 3D keys
-    this.sceneManager.onKeyClick = (keyModel) => {
-      analytics.trackKeyPress(keyModel.letter, "click");
+    // Click handler for 3D keys (only when scene is active)
+    if (this.sceneManager) {
+      this.sceneManager.onKeyClick = (keyModel) => {
+        analytics.trackKeyPress(keyModel.letter, "click");
 
-      if (this.state === STATES.READY && keyModel.isTypoKey) {
-        this.triggerIntro(keyModel.letter);
-      } else if (this.state === STATES.MAIN) {
-        keyModel.press();
-        this.audioManager.playKeyPress(keyModel.letter);
-        setTimeout(() => {
-          keyModel.release();
-          this.audioManager.playKeyRelease(keyModel.letter);
-        }, 100);
-      }
-    };
+        if (this.state === STATES.READY && keyModel.isTypoKey) {
+          this.triggerIntro(keyModel.letter);
+        } else if (this.state === STATES.MAIN) {
+          keyModel.press();
+          this.audioManager.playKeyPress(keyModel.letter);
+          setTimeout(() => {
+            keyModel.release();
+            this.audioManager.playKeyRelease(keyModel.letter);
+          }, 100);
+        }
+      };
+    }
 
     // Scroll down on hero triggers intro
     this.handleWheel = (e) => {
@@ -312,7 +292,10 @@ export class App {
    */
   update(delta, elapsed) {
     // Update shimmer on all visible keys
-    if (this.state === STATES.READY || this.state === STATES.MAIN) {
+    if (
+      this.keyboardLayout &&
+      (this.state === STATES.READY || this.state === STATES.MAIN)
+    ) {
       this.keyboardLayout.updateShimmer(elapsed);
     }
   }
@@ -357,16 +340,15 @@ export class App {
         break;
 
       case STATES.MAIN:
+        // Hide loading/hint in case we jumped directly to MAIN
+        this.loadingEl?.classList.add("hidden");
+        this.hintEl?.classList.add("hidden");
         // Show navigation and heading, enable scrolling
         this.navigation.show();
         document.getElementById("site-heading").classList.add("visible");
         this.scrollController.reveal();
 
-        // Start particle effects — full-screen letter canvas + scroll-driven spawning
-        this.particleCanvas = new ParticleCanvas();
-        this.contactSection.particleCanvas = this.particleCanvas;
-        this.scrollSpawner = new ScrollParticleSpawner(this.particleCanvas);
-        this.scrollSpawner.attach();
+        // Particle text effect disabled for now
         break;
     }
   }

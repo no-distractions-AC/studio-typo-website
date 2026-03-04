@@ -262,9 +262,7 @@ export class TileErosion extends ImageEffect {
 
         const px = Math.round(Math.min(Math.max(cx, 0), w - 1));
         const py = Math.round(Math.min(Math.max(cy, 0), h - 1));
-        const inText = maskData
-          ? maskData[(py * w + px) * 4 + 3] > 128
-          : true;
+        const inText = maskData ? maskData[(py * w + px) * 4 + 3] > 128 : true;
 
         const srcX =
           this._params.renderMode === "image"
@@ -455,8 +453,11 @@ export class TileErosion extends ImageEffect {
         }
 
         if (noiseAmp > 0 && !this.reducedMotion) {
-          const t = ((now - this._startTime) * 0.001) * noiseSpeed;
-          const nx = noise2D(tile.cx * noiseScale + t, tile.cy * noiseScale + t);
+          const t = (now - this._startTime) * 0.001 * noiseSpeed;
+          const nx = noise2D(
+            tile.cx * noiseScale + t,
+            tile.cy * noiseScale + t,
+          );
           const ny = noise2D(
             tile.cx * noiseScale + t + 100,
             tile.cy * noiseScale + t + 100,
@@ -591,7 +592,7 @@ export class TileErosion extends ImageEffect {
           ts,
         );
       } else {
-        ctx.fillStyle = this._overlayColor || "rgba(255,255,255,0.12)";
+        ctx.fillStyle = this._overlayColor || "#ffffff";
         ctx.fillRect(-halfTs, -halfTs, ts, ts);
       }
       ctx.restore();
@@ -621,18 +622,14 @@ export class TileErosion extends ImageEffect {
       return;
     }
     const isDark = this.options.theme !== "light";
-    this._overlayColor = isDark
-      ? "rgba(255,255,255,0.12)"
-      : "rgba(0,0,0,0.12)";
+    this._overlayColor = isDark ? "#ffffff" : "#000000";
   }
 
   onThemeChange(isDark) {
     if (this._params.overlayColor) {
       this._overlayColor = this._params.overlayColor;
     } else {
-      this._overlayColor = isDark
-        ? "rgba(255,255,255,0.12)"
-        : "rgba(0,0,0,0.12)";
+      this._overlayColor = isDark ? "#ffffff" : "#000000";
     }
     if (this._textEl) {
       this._textEl.style.color = isDark ? "#f5f6f7" : "#0d0f12";
