@@ -148,6 +148,20 @@ body.scrollable {
   top: var(--space-4);
 }
 
+/* Global typo hover effect */
+.typo-letter {
+  cursor: default;
+  transition: color 0.15s ease-out;
+}
+
+.typo-letter.typo-hover-active {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--typo-squiggly);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 /* Hidden utility */
 .hidden {
   display: none !important;

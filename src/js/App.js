@@ -17,6 +17,7 @@ import { ContactSection } from "./ui/ContactSection.js";
 import { ParticleCanvas } from "./ui/ParticleCanvas.js";
 import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
 import { TypoRotator } from "./ui/TypoRotator.js";
+import { TypoHover } from "./ui/TypoHover.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -62,6 +63,7 @@ export class App {
     this.soundToggle = null;
     this.scrollController = null;
     this.typoRotator = null;
+    this.typoHover = null;
     this.teamSection = null;
 
     // Particle effects
@@ -213,6 +215,10 @@ export class App {
         }
       },
     });
+
+    // Initialize global typo hover effect
+    this.typoHover = new TypoHover();
+    this.typoHover.init();
   }
 
   /**
@@ -454,6 +460,7 @@ export class App {
     this.audioManager?.dispose();
     this.scrollController?.dispose();
     this.typoRotator?.dispose();
+    this.typoHover?.dispose();
     this.scrollSpawner?.dispose();
     this.particleCanvas?.dispose();
   }
