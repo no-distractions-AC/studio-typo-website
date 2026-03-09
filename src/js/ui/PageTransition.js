@@ -105,6 +105,9 @@ export class ScrollController {
     e.preventDefault();
     if (this.isSnapping) return;
 
+    // Ignore small inertia ticks from trackpads
+    if (Math.abs(e.deltaY) < 7) return;
+
     if (e.deltaY > 0 && this.currentSnapIndex < this.snapTargets.length - 1) {
       this.snapTo(this.currentSnapIndex + 1);
     } else if (e.deltaY < 0 && this.currentSnapIndex > 0) {
@@ -137,7 +140,10 @@ export class ScrollController {
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        this.isSnapping = false;
+        // Cooldown after animation to absorb trackpad inertia
+        setTimeout(() => {
+          this.isSnapping = false;
+        }, 300);
       }
     };
     requestAnimationFrame(animate);

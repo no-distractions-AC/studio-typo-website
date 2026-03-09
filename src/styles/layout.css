@@ -152,6 +152,8 @@ body.scrollable {
 .typo-letter {
   cursor: default;
   transition: color 0.15s ease-out;
+  padding: 4px 1px;
+  margin: -4px -1px;
 }
 
 .typo-letter.typo-hover-active {

@@ -4,7 +4,7 @@
  */
 
 const TYPO_COLORS = ["#ff3b30", "#2dd4bf", "#a78bfa", "#34d399"];
-const RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%&?";
+const RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const SKIP_TAGS = new Set([
   "SCRIPT",
   "STYLE",
@@ -125,31 +125,85 @@ export class TypoHover {
     textNode.parentNode.replaceChild(fragment, textNode);
   }
 
+  _applyTypo(el) {
+    if (el.dataset.original) return; // already typo'd
+    el.dataset.original = el.textContent;
+    el.textContent =
+      RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
+    el.classList.add("typo-hover-active");
+    el.style.color =
+      TYPO_COLORS[Math.floor(Math.random() * TYPO_COLORS.length)];
+  }
+
+  _removeTypo(el) {
+    if (!el.dataset.original) return;
+    el.textContent = el.dataset.original;
+    el.classList.remove("typo-hover-active");
+    el.style.color = "";
+    delete el.dataset.original;
+  }
+
+  _getNeighbors(el, count) {
+    const neighbors = [];
+    let prev = el.previousElementSibling;
+    let next = el.nextElementSibling;
+
+    for (let i = 0; i < count; i++) {
+      // Alternate between picking next and prev neighbors
+      if (i % 2 === 0 && next?.classList?.contains("typo-letter")) {
+        neighbors.push(next);
+        next = next.nextElementSibling;
+      } else if (prev?.classList?.contains("typo-letter")) {
+        neighbors.push(prev);
+        prev = prev.previousElementSibling;
+      } else if (next?.classList?.contains("typo-letter")) {
+        neighbors.push(next);
+        next = next.nextElementSibling;
+      }
+    }
+    return neighbors;
+  }
+
   _onMouseEnter(e) {
     const el = e.target;
     if (!el.classList?.contains("typo-letter")) return;
+    // Already typo'd as someone else's neighbor — don't cascade
+    if (el.dataset.original) return;
 
-    // Store original and swap
-    el.dataset.original = el.textContent;
-    const randomChar =
-      RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
-    const randomColor =
-      TYPO_COLORS[Math.floor(Math.random() * TYPO_COLORS.length)];
+    // Apply typo to hovered letter
+    this._applyTypo(el);
 
-    el.textContent = randomChar;
-    el.classList.add("typo-hover-active");
-    el.style.color = randomColor;
+    // Roll for spread: 80% single, 15% +1 neighbor, 5% +2 neighbors
+    const roll = Math.random();
+    let spreadCount = 0;
+    if (roll > 0.95) {
+      spreadCount = 2;
+    } else if (roll > 0.8) {
+      spreadCount = 1;
+    }
+
+    const neighbors = this._getNeighbors(el, spreadCount);
+    for (const neighbor of neighbors) {
+      this._applyTypo(neighbor);
+    }
+
+    // Store neighbors for cleanup
+    el._typoNeighbors = neighbors;
   }
 
   _onMouseLeave(e) {
     const el = e.target;
     if (!el.classList?.contains("typo-letter")) return;
-    if (!el.dataset.original) return;
 
-    el.textContent = el.dataset.original;
-    el.classList.remove("typo-hover-active");
-    el.style.color = "";
-    delete el.dataset.original;
+    this._removeTypo(el);
+
+    // Clean up neighbors
+    if (el._typoNeighbors) {
+      for (const neighbor of el._typoNeighbors) {
+        this._removeTypo(neighbor);
+      }
+      delete el._typoNeighbors;
+    }
   }
 
   dispose() {
