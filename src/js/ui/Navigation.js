@@ -32,13 +32,21 @@ export class Navigation {
   }
 
   /**
+   * Make nav DOM-ready but invisible. Scroll handler controls visibility.
+   */
+  prepare() {
+    this.navElement.classList.remove("hidden");
+    this.navElement.classList.remove("visible");
+
+    this.controlsElement?.classList.remove("hidden");
+    this.controlsElement?.classList.remove("visible");
+  }
+
+  /**
    * Show the navigation and controls
    */
   show() {
-    this.navElement.classList.remove("hidden");
     this.navElement.classList.add("visible");
-
-    this.controlsElement?.classList.remove("hidden");
     this.controlsElement?.classList.add("visible");
   }
 
@@ -47,10 +55,7 @@ export class Navigation {
    */
   hide() {
     this.navElement.classList.remove("visible");
-    this.navElement.classList.add("hidden");
-
     this.controlsElement?.classList.remove("visible");
-    this.controlsElement?.classList.add("hidden");
   }
 
   /**

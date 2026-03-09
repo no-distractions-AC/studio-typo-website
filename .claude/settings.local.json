@@ -14,7 +14,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:api.github.com)",
       "Bash(grep:*)",
-      "Bash(sips:*)"
+      "Bash(sips:*)",
+      "Bash(pkill:*)"
     ]
   }
 }

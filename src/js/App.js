@@ -16,6 +16,7 @@ import { WorkSection } from "./ui/WorkSection.js";
 import { ContactSection } from "./ui/ContactSection.js";
 import { ParticleCanvas } from "./ui/ParticleCanvas.js";
 import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
+import { TypoRotator } from "./ui/TypoRotator.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -60,6 +61,7 @@ export class App {
     this.themeToggle = null;
     this.soundToggle = null;
     this.scrollController = null;
+    this.typoRotator = null;
     this.teamSection = null;
 
     // Particle effects
@@ -182,11 +184,19 @@ export class App {
       },
     );
 
+    // Initialize typo rotator (letter cycling on "o" in hero heading)
+    const rotatingLetterEl = document.getElementById("typo-rotating-letter");
+    if (rotatingLetterEl) {
+      this.typoRotator = new TypoRotator(rotatingLetterEl);
+    }
+
     // Initialize scroll controller
     this.scrollController = new ScrollController({
       headingEl: document.getElementById("site-heading"),
       contentEl: document.getElementById("content"),
       canvasEl: document.getElementById("canvas"),
+      navigation: this.navigation,
+      typoRotator: this.typoRotator,
       onSectionChange: (sectionId) => {
         this.navigation.setActive(sectionId);
         analytics.trackNavigation(sectionId);
@@ -343,8 +353,9 @@ export class App {
         // Hide loading/hint in case we jumped directly to MAIN
         this.loadingEl?.classList.add("hidden");
         this.hintEl?.classList.add("hidden");
-        // Show navigation and heading, enable scrolling
-        this.navigation.show();
+        // Prepare navigation (DOM-ready but hidden), show heading, enable scrolling
+        // Navigation visibility is managed by scroll position in ScrollController
+        this.navigation.prepare();
         document.getElementById("site-heading").classList.add("visible");
         this.scrollController.reveal();
 
@@ -442,6 +453,7 @@ export class App {
     this.sceneManager?.dispose();
     this.audioManager?.dispose();
     this.scrollController?.dispose();
+    this.typoRotator?.dispose();
     this.scrollSpawner?.dispose();
     this.particleCanvas?.dispose();
   }

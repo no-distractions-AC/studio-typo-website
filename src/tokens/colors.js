@@ -15,6 +15,10 @@ export const palette = {
   darkGray: "#1a1b20", // Blueish dark gray
   blue: "#0080fe",
   lightBlue: "#8080ff",
+  red: "#ff3b30",
+  teal: "#2dd4bf",
+  violet: "#a78bfa",
+  emerald: "#34d399",
   gray: {
     50: "#fafafa",
     100: "#f5f5f5",
@@ -60,6 +64,12 @@ export const themes = {
       main: palette.white,
       fill: palette.lightBlue,
     },
+    typoRotation: {
+      a: palette.teal,
+      c: palette.violet,
+      r: palette.emerald,
+      squiggly: palette.red,
+    },
     // Gradient overlay colors for key depth effect
     gradient: {
       start: "rgba(0, 0, 0, 0.03)",
@@ -93,6 +103,12 @@ export const themes = {
     lighting: {
       main: palette.white,
       fill: palette.white,
+    },
+    typoRotation: {
+      a: palette.teal,
+      c: palette.violet,
+      r: palette.emerald,
+      squiggly: palette.red,
     },
     // Gradient overlay colors for key depth effect
     gradient: {

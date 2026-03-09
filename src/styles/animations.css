@@ -98,6 +98,29 @@
   }
 }
 
+/* Breathing animation for scroll indicator */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Letter enter animation for typo rotation */
+@keyframes letterEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Bounce for attention */
 @keyframes bounce {
   0%,

@@ -28,6 +28,12 @@
   --typo-highlight: rgba(0, 128, 254, 0.25);
   --typo-highlight-border: #0080fe;
 
+  /* Typo rotation (hero letter cycling) */
+  --typo-letter-a: #2dd4bf;
+  --typo-letter-c: #a78bfa;
+  --typo-letter-r: #34d399;
+  --typo-squiggly: #ff3b30;
+
   /* Borders */
   --border-primary: #2a2a34;
   --border-secondary: #3a3a44;
@@ -110,6 +116,12 @@
   /* Typo highlight (spell check) */
   --typo-highlight: rgba(128, 128, 255, 0.15);
   --typo-highlight-border: #8080ff;
+
+  /* Typo rotation (hero letter cycling) */
+  --typo-letter-a: #2dd4bf;
+  --typo-letter-c: #a78bfa;
+  --typo-letter-r: #34d399;
+  --typo-squiggly: #ff3b30;
 
   /* Adjusted shadows for light theme */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);

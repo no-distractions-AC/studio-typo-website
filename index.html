@@ -221,10 +221,29 @@
     <!-- Site Heading (animates to top-left on nav click) -->
     <header id="site-heading" class="site-heading">
       <h1 class="heading-brand">
-        <span class="heading-studio">Studio</span><span class="heading-dot">.</span><span class="heading-typo">Typo</span>
+        <span class="heading-studio">Studio</span
+        ><span class="heading-dot">.</span
+        ><span class="heading-typo"
+          >Typ<span class="heading-typo-o" id="typo-rotating-letter"
+            >o</span
+          ></span
+        >
       </h1>
       <span id="section-label" class="section-label"></span>
     </header>
+
+    <!-- Scroll Indicator (hero state) -->
+    <div id="scroll-indicator" class="scroll-indicator">
+      <svg width="32" height="48" viewBox="0 0 16 24" fill="none">
+        <path
+          d="M8 4L8 20M2 14L8 20L14 14"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
 
     <!-- Content Container -->
     <main id="content" class="content-container">

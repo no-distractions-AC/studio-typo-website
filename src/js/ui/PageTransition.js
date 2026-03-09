@@ -14,12 +14,16 @@ export class ScrollController {
     headingEl,
     contentEl,
     canvasEl,
+    navigation,
+    typoRotator,
     onSectionChange,
     onSectionVisible,
   }) {
     this.heading = headingEl;
     this.content = contentEl;
     this.canvas = canvasEl;
+    this.navigation = navigation;
+    this.typoRotator = typoRotator;
     this.onSectionChange = onSectionChange;
     this.onSectionVisible = onSectionVisible;
 
@@ -38,6 +42,9 @@ export class ScrollController {
     this.currentSnapIndex = 0;
     this.isSnapping = false;
     this.handleWheel = null;
+
+    // Scroll indicator
+    this.scrollIndicator = document.getElementById("scroll-indicator");
 
     this.init();
   }
@@ -78,9 +85,19 @@ export class ScrollController {
     if (progress > 0.4 && !this.headingLocked) {
       this.heading.classList.add("top-left");
       this.headingLocked = true;
+
+      // Show nav, hide hero elements
+      this.navigation?.show();
+      this.typoRotator?.stop();
+      this.scrollIndicator?.classList.remove("visible");
     } else if (progress <= 0.3 && this.headingLocked) {
       this.heading.classList.remove("top-left");
       this.headingLocked = false;
+
+      // Hide nav, show hero elements
+      this.navigation?.hide();
+      this.typoRotator?.start();
+      this.scrollIndicator?.classList.add("visible");
     }
   }
 
@@ -208,10 +225,14 @@ export class ScrollController {
     this.setupRevealObserver();
     this.setupLazyObserver();
 
-    // Auto-scroll to first content section after intro
+    // Show scroll indicator and start letter rotation at hero
+    this.scrollIndicator?.classList.add("visible");
+    this.typoRotator?.start();
+
+    // Auto-scroll to first content section after hero pause
     setTimeout(() => {
       this.snapTo(1);
-    }, 300);
+    }, 2500);
   }
 
   /**
