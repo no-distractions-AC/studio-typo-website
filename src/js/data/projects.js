@@ -14,6 +14,7 @@ export const PROJECTS = [
       "A platform to measure things in your life and visualize them via a Telegram bot and web app",
     tags: ["Product", "Web Dev", "Design", "Data Visualization"],
     image: `${base}work/metrics.webp`,
+    images: [`${base}work/metrics.webp`],
   },
   {
     id: "learn",
@@ -23,6 +24,7 @@ export const PROJECTS = [
       "An AI-powered node graph that helps you find gaps in your knowledge and go deep into any topic",
     tags: ["Solo Product", "Web Dev", "Product", "AI"],
     image: `${base}work/learn.webp`,
+    images: [`${base}work/learn.webp`],
   },
   {
     id: "finland-museum",
@@ -32,6 +34,7 @@ export const PROJECTS = [
       "Web-based interactive museum installations developed for museums in and around Finland",
     tags: ["Web Development", "Museum Installation"],
     image: `${base}work/finland-museum.webp`,
+    images: [`${base}work/finland-museum.webp`],
   },
   {
     id: "blood-speaks",
@@ -41,6 +44,7 @@ export const PROJECTS = [
       "An immersive VR experience following Maya, who becomes a superhero with powers rooted in menstruation",
     tags: ["Development", "Game Design", "Unreal", "VR"],
     image: `${base}work/blood-speaks.webp`,
+    images: [`${base}work/blood-speaks.webp`],
   },
   {
     id: "chronoline",
@@ -50,6 +54,7 @@ export const PROJECTS = [
       "A trivia game that tests your knowledge of the timeline of events",
     tags: ["Solo Creator", "Game", "Unity"],
     image: `${base}work/chronoline.webp`,
+    images: [`${base}work/chronoline.webp`],
   },
   {
     id: "gamed",
@@ -58,6 +63,7 @@ export const PROJECTS = [
     description: "6 games in 6 months, created with my sister Divya Tak",
     tags: ["Development", "Game Design", "Unity", "WebGL"],
     image: `${base}work/gamed.webp`,
+    images: [`${base}work/gamed.webp`],
   },
   {
     id: "ladyland",
@@ -67,6 +73,7 @@ export const PROJECTS = [
       "A narrative-driven game based on Rokeya Hussain's iconic 1907 story, Sultana's Dream",
     tags: ["Development", "Game Design", "Environment", "Unreal"],
     image: `${base}work/ladyland.webp`,
+    images: [`${base}work/ladyland.webp`],
   },
   {
     id: "antariksha",
@@ -76,6 +83,7 @@ export const PROJECTS = [
       "A single-player action-adventure game set in a fantasy world inspired by Indian mythology and culture",
     tags: ["Development", "Game Design", "Unreal"],
     image: `${base}work/antariksha.webp`,
+    images: [`${base}work/antariksha.webp`],
   },
   {
     id: "honeytwigs",
@@ -85,6 +93,7 @@ export const PROJECTS = [
       "A cute and cozy visual novel where you play as an employee at a tiny magical cafe conjoined with a nursery",
     tags: ["Development", "Game Design", "Unity"],
     image: `${base}work/honeytwigs.webp`,
+    images: [`${base}work/honeytwigs.webp`],
   },
   {
     id: "mindless-runner",
@@ -94,6 +103,7 @@ export const PROJECTS = [
       "An intense endless runner-puzzle hybrid using the stroop effect to mess with the player's mind",
     tags: ["Development", "Game Design", "Game Jam", "Unity"],
     image: `${base}work/mindless-runner.webp`,
+    images: [`${base}work/mindless-runner.webp`],
   },
   {
     id: "hackathon-room",
@@ -103,6 +113,7 @@ export const PROJECTS = [
       "A tool to automatically generate a room in Blender from a natural language description",
     tags: ["Tool", "3D", "AI", "Development", "Blender", "Hackathon"],
     image: `${base}work/hackathon-room.webp`,
+    images: [`${base}work/hackathon-room.webp`],
   },
   {
     id: "synesthesia",
@@ -112,6 +123,7 @@ export const PROJECTS = [
       "A short musical experience where environment and music are in sync, created for the Unreal WCP fellowship",
     tags: ["Video Production", "Solo Project", "Unreal"],
     image: `${base}work/synesthesia.webp`,
+    images: [`${base}work/synesthesia.webp`],
   },
   {
     id: "bubble-blitz",
@@ -121,6 +133,7 @@ export const PROJECTS = [
       "Gulp bubbles tinier than you — made for Ludum Dare 44 in 48 hours",
     tags: ["Solo Creator", "Game", "Unity", "Game Jam"],
     image: `${base}work/bubble-blitz.webp`,
+    images: [`${base}work/bubble-blitz.webp`],
   },
   {
     id: "econagri",
@@ -130,6 +143,7 @@ export const PROJECTS = [
       "A tile-based city building game where you balance economic and ecological sustainability",
     tags: ["Development", "Game", "Unity"],
     image: `${base}work/econagri.webp`,
+    images: [`${base}work/econagri.webp`],
   },
   {
     id: "tarq",
@@ -139,6 +153,7 @@ export const PROJECTS = [
       "A web-based AR experience to explore the gallery space of TARQ, a contemporary art gallery in Mumbai",
     tags: ["Web Dev", "AR", "Museum Installation"],
     image: `${base}work/tarq.webp`,
+    images: [`${base}work/tarq.webp`],
   },
   {
     id: "futurecapture",
@@ -148,6 +163,7 @@ export const PROJECTS = [
       "A participatory installation that captures your face and creates a new identity in a collective virtual world",
     tags: ["Development", "Museum Installation", "Unity"],
     image: `${base}work/futurecapture.webp`,
+    images: [`${base}work/futurecapture.webp`],
   },
   {
     id: "incommon",
@@ -157,6 +173,7 @@ export const PROJECTS = [
       "A VR experience where the environment becomes part of the stories people share from separate physical locations",
     tags: ["Development", "VR", "Unreal"],
     image: `${base}work/incommon.webp`,
+    images: [`${base}work/incommon.webp`],
   },
   {
     id: "qslayers",
@@ -166,6 +183,7 @@ export const PROJECTS = [
       "A 2D turn-based strategy game where you defeat monsters by answering questions",
     tags: ["Development", "Game Design"],
     image: `${base}work/qslayers.webp`,
+    images: [`${base}work/qslayers.webp`],
   },
   {
     id: "the-poll",
@@ -175,6 +193,7 @@ export const PROJECTS = [
       "Digitization of the board game 'The Poll' — a multiplayer game simulating Indian General Elections",
     tags: ["Development", "Multiplayer", "Game", "Unity"],
     image: `${base}work/the-poll.webp`,
+    images: [`${base}work/the-poll.webp`],
   },
   {
     id: "civic-game-lab",
@@ -184,14 +203,27 @@ export const PROJECTS = [
       "Games for social change that promote civic values by telling South Asia's story through play",
     tags: ["Development", "Game", "Unity"],
     image: `${base}work/civic-game-lab.webp`,
+    images: [`${base}work/civic-game-lab.webp`],
   },
 ];
 
 export const WORK_CATEGORIES = [
   { id: "all", label: "All" },
-  { id: "games", label: "Games", matchTags: ["Game", "Game Design", "Game Jam"] },
-  { id: "web", label: "Web", matchTags: ["Web Dev", "Web Development", "Product", "Solo Product"] },
+  {
+    id: "games",
+    label: "Games",
+    matchTags: ["Game", "Game Design", "Game Jam"],
+  },
+  {
+    id: "web",
+    label: "Web",
+    matchTags: ["Web Dev", "Web Development", "Product", "Solo Product"],
+  },
   { id: "xr", label: "XR", matchTags: ["VR", "AR"] },
-  { id: "installations", label: "Installations", matchTags: ["Museum Installation"] },
+  {
+    id: "installations",
+    label: "Installations",
+    matchTags: ["Museum Installation"],
+  },
   { id: "ai-tools", label: "AI & Tools", matchTags: ["AI", "Tool"] },
 ];
