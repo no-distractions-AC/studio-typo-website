@@ -104,12 +104,28 @@ export class ScrollController {
   }
 
   _onWheel(e) {
-    e.preventDefault();
-    if (this.isSnapping) return;
+    if (this.isSnapping) {
+      e.preventDefault();
+      return;
+    }
 
     // Ignore small inertia ticks from trackpads
     if (Math.abs(e.deltaY) < 7) return;
 
+    // Allow free scrolling within sections taller than the viewport
+    const currentEl = this.snapTargets[this.currentSnapIndex];
+    const rect = currentEl.getBoundingClientRect();
+    const isTall = currentEl.scrollHeight > window.innerHeight + 2;
+
+    if (isTall) {
+      const atTop = rect.top >= -1;
+      const atBottom = rect.bottom <= window.innerHeight + 1;
+
+      if (e.deltaY > 0 && !atBottom) return;
+      if (e.deltaY < 0 && !atTop) return;
+    }
+
+    e.preventDefault();
     if (e.deltaY > 0 && this.currentSnapIndex < this.snapTargets.length - 1) {
       this.snapTo(this.currentSnapIndex + 1);
     } else if (e.deltaY < 0 && this.currentSnapIndex > 0) {

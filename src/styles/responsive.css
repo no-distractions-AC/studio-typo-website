@@ -13,6 +13,10 @@
     padding: var(--space-8, 2rem) 0;
   }
 
+  #section-contact {
+    align-items: flex-start;
+  }
+
   /* Minimal nav adjustments for mobile */
   .nav-minimal {
     left: 40px;

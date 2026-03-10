@@ -3,6 +3,15 @@
  * Form, textarea mirror overlay, and typo highlight animations
  */
 
+/* Compact contact section to fit within a single viewport */
+#section-contact {
+  padding: var(--space-8) 0;
+}
+
+#section-contact .section-title {
+  margin-bottom: var(--space-4);
+}
+
 /* Center the contact section within the content area. */
 #section-contact .section-inner-wide {
   max-width: none;
@@ -16,8 +25,8 @@
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-  margin-top: var(--space-8);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
   max-width: 600px;
   width: 100%;
   text-align: left;
@@ -88,7 +97,7 @@
 
 .form-textarea {
   resize: vertical;
-  min-height: 150px;
+  min-height: 100px;
   line-height: 1.7;
 }
 
@@ -150,7 +159,7 @@
 
 /* Contact links spacing when below form */
 .contact-form + .contact-links {
-  margin-top: var(--space-10);
+  margin-top: var(--space-6);
   text-align: left;
   width: 100%;
   max-width: 600px;
@@ -275,6 +284,6 @@
   }
 
   .form-textarea {
-    min-height: 120px;
+    min-height: 80px;
   }
 }
