@@ -6,12 +6,64 @@
 
 import { prefersReducedMotion } from "../utils/device.js";
 
-// Timing
-const TYPE_SPEED = 120; // ms per character typed
-const BACKSPACE_SPEED = 80; // ms per character deleted
-const TYPO_PAUSE = 1000; // pause on each typo letter
-const FINAL_PAUSE = 1400; // pause after returning to "o" before onComplete
-const CURSOR_SETTLE = 1400; // let cursor blink a bit after typing finishes
+// Default timing values
+const DEFAULTS = {
+  typeSpeed: 120,
+  backspaceSpeed: 80,
+  typoPause: 1000,
+  finalPause: 1400,
+  cursorSettle: 1400,
+  autoScrollDelay: 800,
+  cursorBlinkRate: 530,
+};
+
+const STORAGE_KEY = "typo-timings";
+
+// Shared mutable timings object
+const timings = { ...DEFAULTS };
+
+// Load saved timings from localStorage
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if (saved) Object.assign(timings, saved);
+} catch {
+  // ignore
+}
+
+/** Get current timings */
+export function getTimings() {
+  return { ...timings };
+}
+
+/** Get default timings */
+export function getDefaults() {
+  return { ...DEFAULTS };
+}
+
+/** Update timings (partial or full) */
+export function setTimings(obj) {
+  Object.assign(timings, obj);
+  // Update cursor blink CSS variable
+  document.documentElement.style.setProperty(
+    "--cursor-blink-rate",
+    `${timings.cursorBlinkRate}ms`,
+  );
+}
+
+/** Save current timings to localStorage */
+export function saveTimings() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(timings));
+}
+
+/** Reset timings to defaults and clear localStorage */
+export function resetTimings() {
+  Object.assign(timings, DEFAULTS);
+  localStorage.removeItem(STORAGE_KEY);
+  document.documentElement.style.setProperty(
+    "--cursor-blink-rate",
+    `${DEFAULTS.cursorBlinkRate}ms`,
+  );
+}
 
 // The full text broken into segments matching HTML spans
 const SEGMENTS = [
@@ -25,8 +77,9 @@ const SEGMENTS = [
 const TYPO_LETTERS = ["a", "c", "r", "o"];
 
 export class TypoRotator {
-  constructor(letterEl) {
+  constructor(letterEl, audioManager) {
     this.letterEl = letterEl; // #typo-rotating-letter (.heading-typo-o)
+    this.audio = audioManager || null;
 
     // Grab sibling span references from the heading
     const brand = letterEl.closest(".heading-brand");
@@ -38,6 +91,12 @@ export class TypoRotator {
     this.timeoutId = null;
     this.isActive = false;
     this.onComplete = null;
+
+    // Apply initial cursor blink rate
+    document.documentElement.style.setProperty(
+      "--cursor-blink-rate",
+      `${timings.cursorBlinkRate}ms`,
+    );
   }
 
   /**
@@ -131,13 +190,14 @@ export class TypoRotator {
         if (!this.isActive) return;
         el.textContent += segment.text[i];
         this._moveCursorAfter(el);
-        await this._wait(TYPE_SPEED);
+        this._playKey(segment.text[i]);
+        await this._wait(timings.typeSpeed);
       }
     }
 
     // Brief pause after full text is typed
     if (!this.isActive) return;
-    await this._wait(CURSOR_SETTLE);
+    await this._wait(timings.cursorSettle);
 
     // Phase 2: Typo cycle — backspace last letter, type typo, repeat
     for (const typoLetter of TYPO_LETTERS) {
@@ -148,11 +208,13 @@ export class TypoRotator {
       this.letterEl.classList.remove("is-typo");
       delete this.letterEl.dataset.typoLetter;
       this._moveCursorAfter(this.letterEl);
-      await this._wait(BACKSPACE_SPEED);
+      this._playKey("Backspace");
+      await this._wait(timings.backspaceSpeed);
 
       if (!this.isActive) return;
 
       // Type the new letter
+      this._playKey(typoLetter);
       this.letterEl.textContent = typoLetter;
       const isTypo = typoLetter !== "o";
       if (isTypo) {
@@ -165,7 +227,7 @@ export class TypoRotator {
       this._moveCursorAfter(this.letterEl);
 
       // Pause on the letter
-      const pause = typoLetter === "o" ? FINAL_PAUSE : TYPO_PAUSE;
+      const pause = typoLetter === "o" ? timings.finalPause : timings.typoPause;
       await this._wait(pause);
     }
 
@@ -174,6 +236,13 @@ export class TypoRotator {
     this.isActive = false;
     this._removeCursor();
     this.onComplete?.();
+  }
+
+  /** Play a key press + release sound */
+  _playKey(key) {
+    if (!this.audio) return;
+    this.audio.playKeyPress(key);
+    setTimeout(() => this.audio.playKeyRelease(key), 50);
   }
 
   _wait(ms) {

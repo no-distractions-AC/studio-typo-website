@@ -281,7 +281,7 @@ body.scrollable {
   width: 0.06em;
   height: 100%;
   background: var(--text-primary);
-  animation: cursorBlink 0.53s step-end infinite;
+  animation: cursorBlink var(--cursor-blink-rate, 530ms) step-end infinite;
 }
 
 @keyframes cursorBlink {

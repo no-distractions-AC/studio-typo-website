@@ -16,8 +16,9 @@ import { WorkSection } from "./ui/WorkSection.js";
 import { ContactSection } from "./ui/ContactSection.js";
 import { ParticleCanvas } from "./ui/ParticleCanvas.js";
 import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
-import { TypoRotator } from "./ui/TypoRotator.js";
+import { TypoRotator, getTimings } from "./ui/TypoRotator.js";
 import { TypoHover } from "./ui/TypoHover.js";
+import { TimingPanel } from "./ui/TimingPanel.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -189,14 +190,15 @@ export class App {
     // Initialize typo rotator (letter cycling on "o" in hero heading)
     const rotatingLetterEl = document.getElementById("typo-rotating-letter");
     if (rotatingLetterEl) {
-      this.typoRotator = new TypoRotator(rotatingLetterEl);
+      this.typoRotator = new TypoRotator(rotatingLetterEl, this.audioManager);
     }
 
     // Auto-scroll callback shared between initial load and hero returns
     this._typoCompleteCallback = () => {
+      const delay = getTimings().autoScrollDelay;
       setTimeout(() => {
         this.scrollController.snapTo(1);
-      }, 800);
+      }, delay);
     };
 
     // Initialize scroll controller
@@ -227,6 +229,18 @@ export class App {
     // Initialize global typo hover effect
     this.typoHover = new TypoHover();
     this.typoHover.init();
+
+    // Initialize timing tuning panel (Shift+T to toggle)
+    this.timingPanel = new TimingPanel({
+      onReplay: () => {
+        this.typoRotator?.stop();
+        // Scroll back to hero first
+        this.scrollController.snapTo(0);
+        setTimeout(() => {
+          this.typoRotator?.start(this._typoCompleteCallback);
+        }, 500);
+      },
+    });
   }
 
   /**
