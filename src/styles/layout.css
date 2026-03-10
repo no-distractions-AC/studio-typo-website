@@ -439,6 +439,7 @@ body.scrollable {
 }
 
 .section-inner-wide {
+  width: 100%;
   max-width: 900px;
 }
 
@@ -471,71 +472,12 @@ body.scrollable {
   line-height: 1.6;
 }
 
-/* Venn Diagram */
-.venn-diagram {
-  display: block;
-  width: 200%;
-  max-width: 1400px;
+/* Constellation Diagram */
+.constellation-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
   margin: var(--space-8) auto 0;
-  margin-left: -50%;
-}
-
-.venn-circle {
-  fill: none;
-  stroke: var(--text-primary);
-  stroke-width: 1;
-  opacity: 0.3;
-  transition: opacity var(--duration-normal) var(--ease-out);
-}
-
-.venn-hit {
-  fill: transparent;
-  stroke: none;
-}
-
-.venn-group:hover .venn-circle {
-  opacity: 0.6;
-}
-
-.venn-group .venn-skill {
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
-}
-
-.venn-group:hover .venn-skill {
-  opacity: 1;
-}
-
-.venn-label {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 700;
-  fill: var(--text-primary);
-  text-anchor: middle;
-}
-
-.venn-skill {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  fill: var(--text-secondary);
-  text-anchor: middle;
-}
-
-.venn-overlap {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 700;
-  fill: var(--text-tertiary);
-  text-anchor: middle;
-  font-style: italic;
-}
-
-.venn-center {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  fill: var(--text-primary);
-  text-anchor: middle;
+  position: relative;
 }
 
 /* Experiments */

@@ -54,6 +54,11 @@
     bottom: var(--space-16);
   }
 
+  /* Constellation: squarer aspect on mobile */
+  .constellation-container {
+    aspect-ratio: 1 / 1;
+  }
+
   /* Team: single column on mobile */
   .team-grid {
     grid-template-columns: 1fr;

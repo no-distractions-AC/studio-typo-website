@@ -19,6 +19,7 @@ import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
 import { TypoRotator, getTimings } from "./ui/TypoRotator.js";
 import { TypoHover } from "./ui/TypoHover.js";
 import { TimingPanel } from "./ui/TimingPanel.js";
+import { ConstellationCanvas } from "./ui/ConstellationCanvas.js";
 import {
   createKeyboardHandler,
   createTypoTracker,
@@ -66,6 +67,9 @@ export class App {
     this.typoRotator = null;
     this.typoHover = null;
     this.teamSection = null;
+
+    // Constellation
+    this.constellation = null;
 
     // Particle effects
     this.particleCanvas = null;
@@ -177,6 +181,12 @@ export class App {
     // ParticleCanvas is created later in MAIN state and passed in
     this.contactSection = new ContactSection(this.audioManager, null);
 
+    // Initialize constellation (visibility-based activation via IntersectionObserver)
+    const constellationEl = document.getElementById("constellation-container");
+    if (constellationEl) {
+      this.constellation = new ConstellationCanvas(constellationEl);
+    }
+
     // Initialize navigation
     this.navigation = new Navigation(
       document.getElementById("navigation"),
@@ -213,6 +223,9 @@ export class App {
         analytics.trackNavigation(sectionId);
       },
       onSectionVisible: (sectionId) => {
+        if (sectionId === "services") {
+          this.constellation?.activate();
+        }
         if (sectionId === "work") {
           this.workSection.activate();
         }
@@ -486,5 +499,6 @@ export class App {
     this.typoHover?.dispose();
     this.scrollSpawner?.dispose();
     this.particleCanvas?.dispose();
+    this.constellation?.dispose();
   }
 }
