@@ -45,6 +45,7 @@ export class ContactSection {
 
     this.initFormHandling();
     this.initLabelStates();
+    this.initFieldValidation();
   }
 
   initFormHandling() {
@@ -72,7 +73,29 @@ export class ContactSection {
     });
   }
 
-  handleSubmit(form) {
+  initFieldValidation() {
+    const form = document.getElementById("contact-form");
+    if (!form) return;
+
+    this.submitBtn = form.querySelector(".form-submit");
+    this.formInputs = [
+      document.getElementById("contact-name"),
+      document.getElementById("contact-email"),
+      document.getElementById("contact-message"),
+    ];
+
+    this.formInputs.forEach((input) =>
+      input.addEventListener("input", () => this.updateSubmitState()),
+    );
+    this.updateSubmitState();
+  }
+
+  updateSubmitState() {
+    const allFilled = this.formInputs.every((input) => input.value.trim());
+    this.submitBtn.disabled = !allFilled;
+  }
+
+  async handleSubmit(form) {
     const submitBtn = form.querySelector(".form-submit");
     const data = new FormData(form);
     const name = data.get("name")?.trim();
@@ -91,24 +114,49 @@ export class ContactSection {
     submitBtn.querySelector(".submit-text").classList.add("hidden");
     submitBtn.querySelector(".submit-sending").classList.remove("hidden");
 
-    // Simulate send — show "Sent!" after a brief delay
-    setTimeout(() => {
+    try {
+      await fetch(
+        "https://discord.com/api/webhooks/1480846558181326993/qnmGdon0JaKpKcMXcn83t7sUdZiNcOh4viQ1iQHEMVS9EW2STCGfrXUCIlsgkpIzxm_2",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            embeds: [
+              {
+                title: "New Contact Form Submission",
+                color: 0xffffff,
+                fields: [
+                  { name: "Name", value: name, inline: true },
+                  { name: "Email", value: email, inline: true },
+                  { name: "Message", value: message },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          }),
+        },
+      );
+
       submitBtn.classList.remove("sending");
       submitBtn.querySelector(".submit-sending").classList.add("hidden");
       submitBtn.querySelector(".submit-sent").classList.remove("hidden");
 
-      // Reset back to "Send Message" after 3 seconds
       setTimeout(() => {
         submitBtn.querySelector(".submit-sent").classList.add("hidden");
         submitBtn.querySelector(".submit-text").classList.remove("hidden");
         form.reset();
-
-        // Reset label states
+        this.updateSubmitState();
         this.sectionEl.querySelectorAll(".form-label").forEach((label) => {
           label.classList.remove("active");
         });
       }, 3000);
-    }, 1000);
+    } catch {
+      submitBtn.classList.remove("sending");
+      submitBtn.querySelector(".submit-sending").classList.add("hidden");
+      submitBtn.querySelector(".submit-text").classList.remove("hidden");
+      submitBtn.style.animation = "typoWiggle 0.3s ease-in-out";
+      setTimeout(() => (submitBtn.style.animation = ""), 350);
+    }
   }
 
   dispose() {

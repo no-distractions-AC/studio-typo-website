@@ -147,6 +147,11 @@
   transform: scale(0.98);
 }
 
+.form-submit:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .form-submit.sending {
   pointer-events: none;
   opacity: 0.6;
