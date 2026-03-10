@@ -70,11 +70,11 @@ const SEGMENTS = [
   { target: "studio", text: "Studio" },
   { target: "dot", text: "." },
   { target: "typo-text", text: "Typ" },
-  { target: "typo-o", text: "o" },
+  { target: "typo-o", text: "a" },
 ];
 
-// Typo cycle letters (after initial type-out)
-const TYPO_LETTERS = ["a", "c", "r", "o"];
+// Typo cycle letters (after initial type-out of "a")
+const TYPO_LETTERS = ["c", "r", "o"];
 
 export class TypoRotator {
   constructor(letterEl, audioManager) {
@@ -194,6 +194,10 @@ export class TypoRotator {
         await this._wait(timings.typeSpeed);
       }
     }
+
+    // Mark the initial letter as a typo
+    this.letterEl.classList.add("is-typo");
+    this.letterEl.dataset.typoLetter = "a";
 
     // Brief pause after full text is typed
     if (!this.isActive) return;
