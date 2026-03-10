@@ -192,6 +192,13 @@ export class App {
       this.typoRotator = new TypoRotator(rotatingLetterEl);
     }
 
+    // Auto-scroll callback shared between initial load and hero returns
+    this._typoCompleteCallback = () => {
+      setTimeout(() => {
+        this.scrollController.snapTo(1);
+      }, 800);
+    };
+
     // Initialize scroll controller
     this.scrollController = new ScrollController({
       headingEl: document.getElementById("site-heading"),
@@ -214,6 +221,7 @@ export class App {
           this.contactSection.activate();
         }
       },
+      onTypoComplete: this._typoCompleteCallback,
     });
 
     // Initialize global typo hover effect
@@ -365,7 +373,8 @@ export class App {
         document.getElementById("site-heading").classList.add("visible");
         this.scrollController.reveal();
 
-        // Particle text effect disabled for now
+        // Start typewriter animation; auto-scroll when it completes
+        this.typoRotator?.start(this._typoCompleteCallback);
         break;
     }
   }

@@ -233,12 +233,25 @@ body.scrollable {
 }
 
 .heading-brand {
-  display: flex;
-  gap: 0;
+  position: relative;
+  display: inline-block;
   font-size: var(--text-6xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   transition: font-size 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.heading-brand-placeholder {
+  visibility: hidden;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.heading-brand-typed {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
 }
 
 .site-heading.top-left .heading-brand {
@@ -248,6 +261,37 @@ body.scrollable {
 .heading-studio,
 .heading-typo {
   display: inline-block;
+}
+
+/* Typing cursor — zero-width so it doesn't cause layout shifts */
+.typing-cursor {
+  display: inline-block;
+  width: 0;
+  height: 0.9em;
+  vertical-align: baseline;
+  position: relative;
+  overflow: visible;
+}
+
+.typing-cursor::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0.06em;
+  height: 100%;
+  background: var(--text-primary);
+  animation: cursorBlink 0.53s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* Typo "o" letter rotation */

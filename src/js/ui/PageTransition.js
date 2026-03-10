@@ -18,6 +18,7 @@ export class ScrollController {
     typoRotator,
     onSectionChange,
     onSectionVisible,
+    onTypoComplete,
   }) {
     this.heading = headingEl;
     this.content = contentEl;
@@ -26,6 +27,7 @@ export class ScrollController {
     this.typoRotator = typoRotator;
     this.onSectionChange = onSectionChange;
     this.onSectionVisible = onSectionVisible;
+    this.onTypoComplete = onTypoComplete;
 
     this.sections = [];
     this.activeSection = null;
@@ -96,7 +98,7 @@ export class ScrollController {
 
       // Hide nav, show hero elements
       this.navigation?.hide();
-      this.typoRotator?.start();
+      this.typoRotator?.start(this.onTypoComplete);
       this.scrollIndicator?.classList.add("visible");
     }
   }
@@ -231,14 +233,8 @@ export class ScrollController {
     this.setupRevealObserver();
     this.setupLazyObserver();
 
-    // Show scroll indicator and start letter rotation at hero
+    // Show scroll indicator (typo animation is started by App.js)
     this.scrollIndicator?.classList.add("visible");
-    this.typoRotator?.start();
-
-    // Auto-scroll to first content section after hero pause
-    setTimeout(() => {
-      this.snapTo(1);
-    }, 2500);
   }
 
   /**
