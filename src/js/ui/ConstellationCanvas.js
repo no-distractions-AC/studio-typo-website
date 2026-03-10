@@ -1,10 +1,19 @@
 /**
- * ConstellationCanvas - Three cluster nodes in a triangle with click-to-reveal skills.
- * Simple, readable, no physics. Just clean positioning and smooth animation.
+ * ConstellationCanvas - Three cluster nodes rotating in a triangle.
+ * Steps between positions with easing, pauses, and hover control.
+ * The bottom node automatically reveals its skills list.
  */
 
-import { CLUSTERS, getSkillsForCluster } from "../data/constellation.js";
+import { CLUSTERS } from "../data/constellation.js";
 import { isTouchDevice, prefersReducedMotion } from "../utils/device.js";
+
+const STEP_ANGLE = (2 * Math.PI) / 3; // 120 degrees per step
+const PAUSE_DURATION = 2; // seconds to pause at each position
+const EASE_SPEED = 5; // interpolation speed (higher = snappier)
+const SNAP_THRESHOLD = 0.01; // radians — close enough to snap
+const ORBIT_R = 0.25; // single radius for equilateral triangle
+const EXPAND_SPEED = 3;
+const NAV_OFFSET = 80; // shift center right to account for left nav
 
 export class ConstellationCanvas {
   constructor(containerEl) {
@@ -23,15 +32,23 @@ export class ConstellationCanvas {
     this.isTouch = isTouchDevice();
     this.reducedMotion = prefersReducedMotion();
 
+    // Stepped rotation state
+    this.rotationAngle = 0; // current animated rotation
+    this.targetAngle = 0; // target rotation (snaps in STEP_ANGLE increments)
+    this.pauseTimer = PAUSE_DURATION; // countdown until next step
+    this.isSettled = true; // true when rotation has reached target
+
     // Interaction state
     this.hoveredCluster = null;
+    this.isHovering = false;
+    this.bottomCluster = null;
     this.expandedCluster = null;
-    this.expandProgress = 0; // 0 = collapsed, 1 = expanded
+    this.expandProgress = 0;
 
     // Pre-compute skill lists per cluster
     this.skillsMap = new Map();
     for (const c of CLUSTERS) {
-      this.skillsMap.set(c.id, getSkillsForCluster(c.id));
+      this.skillsMap.set(c.id, c.skills);
     }
 
     // Colors
@@ -44,11 +61,11 @@ export class ConstellationCanvas {
     // Events
     this.boundResize = () => this.resize();
     this.boundPointerMove = (e) => this.onPointerMove(e);
-    this.boundPointerDown = (e) => this.onPointerDown(e);
+    this.boundPointerLeave = () => this.onPointerLeave();
 
     window.addEventListener("resize", this.boundResize);
     this.canvas.addEventListener("pointermove", this.boundPointerMove);
-    this.canvas.addEventListener("pointerdown", this.boundPointerDown);
+    this.canvas.addEventListener("pointerleave", this.boundPointerLeave);
 
     // Visibility observer
     this.observer = new IntersectionObserver(
@@ -75,6 +92,7 @@ export class ConstellationCanvas {
       textSecondary: s.getPropertyValue("--text-secondary").trim(),
       textTertiary: s.getPropertyValue("--text-tertiary").trim(),
       border: s.getPropertyValue("--border-primary").trim(),
+      squiggly: s.getPropertyValue("--typo-squiggly").trim(),
       font:
         s.getPropertyValue("--font-mono").trim() || "'Space Mono', monospace",
     };
@@ -118,21 +136,94 @@ export class ConstellationCanvas {
     this.lastTime = now;
     this.elapsed += dt;
 
-    // Animate expand/collapse
+    // --- Stepped rotation logic ---
+    if (!this.reducedMotion) {
+      const diff = this.targetAngle - this.rotationAngle;
+
+      if (Math.abs(diff) > SNAP_THRESHOLD) {
+        // Ease toward target (exponential ease-out)
+        this.rotationAngle += diff * EASE_SPEED * dt;
+        this.isSettled = false;
+      } else {
+        // Snap and mark as settled
+        this.rotationAngle = this.targetAngle;
+        if (!this.isSettled) {
+          this.isSettled = true;
+          this.pauseTimer = PAUSE_DURATION;
+        }
+
+        // Count down pause, then advance to next step
+        if (!this.isHovering) {
+          this.pauseTimer -= dt;
+          if (this.pauseTimer <= 0) {
+            this.targetAngle += STEP_ANGLE;
+            this.isSettled = false;
+          }
+        }
+      }
+    }
+
+    // --- Determine bottom node ---
+    const positions = CLUSTERS.map((c, i) => this.getClusterPos(i));
+    let bottomIdx = 0;
+    for (let i = 1; i < CLUSTERS.length; i++) {
+      if (positions[i].y > positions[bottomIdx].y) bottomIdx = i;
+    }
+    const newBottom = CLUSTERS[bottomIdx].id;
+
+    if (newBottom !== this.bottomCluster) {
+      this.bottomCluster = newBottom;
+      this.expandedCluster = newBottom;
+      this.expandProgress = 0;
+    }
+
+    // Animate expand
     if (this.expandedCluster) {
-      this.expandProgress = Math.min(1, this.expandProgress + dt * 3);
-    } else {
-      this.expandProgress = Math.max(0, this.expandProgress - dt * 4);
+      this.expandProgress = Math.min(
+        1,
+        this.expandProgress + dt * EXPAND_SPEED,
+      );
     }
 
     this.draw();
     this.animId = requestAnimationFrame(() => this.tick());
   }
 
-  getClusterPos(cluster) {
+  /**
+   * Calculate the target angle that places a given cluster index at the bottom.
+   * Bottom = angle of PI/2 for that node.
+   */
+  getTargetAngleForBottom(index) {
+    const baseAngle = (index * 2 * Math.PI) / 3 + Math.PI / 2;
+    // We want baseAngle + target = PI/2 + k*2PI (bottom)
+    // target = PI/2 - baseAngle
+    let desired = Math.PI / 2 - baseAngle;
+
+    // Find the nearest forward rotation from current targetAngle
+    while (desired < this.targetAngle) {
+      desired += 2 * Math.PI;
+    }
+    // Pick the closest direction (forward or just slightly back)
+    const forwardDist = desired - this.targetAngle;
+    const backDist = forwardDist - 2 * Math.PI;
+    if (Math.abs(backDist) < forwardDist) {
+      desired = this.targetAngle + backDist;
+    }
+
+    return desired;
+  }
+
+  getClusterPos(index) {
+    const cx = (this.width + NAV_OFFSET) / 2;
+    const cy = this.height * 0.38;
+    const r = Math.min(this.width, this.height) * ORBIT_R;
+
+    const baseAngle = (index * 2 * Math.PI) / 3 + Math.PI / 2;
+    const angle = baseAngle + this.rotationAngle;
+
     return {
-      x: cluster.cx * this.width,
-      y: cluster.cy * this.height,
+      x: cx + Math.cos(angle) * r,
+      y: cy + Math.sin(angle) * r,
     };
   }
 
@@ -140,18 +231,45 @@ export class ConstellationCanvas {
     const { ctx, width, height, elapsed } = this;
     ctx.clearRect(0, 0, width, height);
 
-    const positions = CLUSTERS.map((c) => this.getClusterPos(c));
+    // Heading at top right
+    ctx.fillStyle = this.colors.textPrimary;
+    ctx.globalAlpha = 0.7;
+    ctx.font = `bold 20px ${this.colors.font}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Let's Build.", (width + NAV_OFFSET) / 2, height * 0.38);
+    ctx.globalAlpha = 1;
 
-    // Draw connecting lines (triangle)
-    ctx.beginPath();
-    ctx.moveTo(positions[0].x, positions[0].y);
-    ctx.lineTo(positions[1].x, positions[1].y);
-    ctx.lineTo(positions[2].x, positions[2].y);
-    ctx.closePath();
-    ctx.strokeStyle = this.colors.border;
-    ctx.globalAlpha = 0.15;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    const positions = CLUSTERS.map((c, i) => this.getClusterPos(i));
+
+    // Draw connecting curves (outward-bowing arcs)
+    const center = {
+      x: (positions[0].x + positions[1].x + positions[2].x) / 3,
+      y: (positions[0].y + positions[1].y + positions[2].y) / 3,
+    };
+    const bulge = 1.3;
+    ctx.strokeStyle = this.colors.textSecondary;
+    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = 1.5;
+
+    const edges = [
+      [0, 1],
+      [1, 2],
+      [2, 0],
+    ];
+    for (const [a, b] of edges) {
+      const A = positions[a];
+      const B = positions[b];
+      const mid = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+      const dx = mid.x - center.x;
+      const dy = mid.y - center.y;
+      const cp = { x: mid.x + dx * bulge, y: mid.y + dy * bulge };
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.quadraticCurveTo(cp.x, cp.y, B.x, B.y);
+      ctx.stroke();
+    }
+
     ctx.globalAlpha = 1;
 
     // Draw each cluster node
@@ -169,41 +287,48 @@ export class ConstellationCanvas {
       const baseRadius = 18;
       const radius = baseRadius + breathe + (isHovered ? 3 : 0);
 
-      // Dim non-expanded clusters when one is expanded
-      const alpha = isOther ? 1 - this.expandProgress * 0.5 : 1;
+      const alpha = 1;
 
-      // Outer glow ring
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, radius + 8, 0, Math.PI * 2);
-      ctx.fillStyle = this.colors.textPrimary;
-      ctx.globalAlpha = alpha * (isHovered || isExpanded ? 0.08 : 0.03);
-      ctx.fill();
+      if (isExpanded) {
+        // Red squiggly circle for active node
+        this.drawSquigglyCircle(pos.x, pos.y, radius, elapsed, alpha);
+      } else {
+        // Outer glow ring
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius + 8, 0, Math.PI * 2);
+        ctx.fillStyle = this.colors.textPrimary;
+        ctx.globalAlpha = alpha * (isHovered ? 0.08 : 0.03);
+        ctx.fill();
 
-      // Main circle
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = this.colors.textPrimary;
-      ctx.globalAlpha = alpha * (isHovered || isExpanded ? 0.7 : 0.4);
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+        // Main circle
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = this.colors.textPrimary;
+        ctx.globalAlpha = alpha * (isHovered ? 0.7 : 0.4);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
 
       // Small filled center dot
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = this.colors.textPrimary;
+      ctx.fillStyle = isExpanded
+        ? this.colors.squiggly
+        : this.colors.textPrimary;
       ctx.globalAlpha = alpha * 0.8;
       ctx.fill();
 
-      // Cluster label
-      ctx.globalAlpha = alpha * (isHovered || isExpanded ? 0.9 : 0.6);
+      // Cluster label — dynamic positioning based on current position
+      ctx.globalAlpha = alpha * (isExpanded ? 1.0 : isHovered ? 0.9 : 0.7);
       ctx.fillStyle = this.colors.textPrimary;
-      ctx.font = `bold 13px ${this.colors.font}`;
+      ctx.font = `bold 18px ${this.colors.font}`;
 
       const lines = cluster.label.split("\n");
-      const lineHeight = 18;
+      const lineHeight = 24;
 
-      if (cluster.labelAlign === "right") {
-        // Label to the right
+      const align = this.getLabelAlign(pos);
+
+      if (align === "right") {
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         for (let l = 0; l < lines.length; l++) {
@@ -211,8 +336,7 @@ export class ConstellationCanvas {
             pos.y - ((lines.length - 1) * lineHeight) / 2 + l * lineHeight;
           ctx.fillText(lines[l], pos.x + radius + 16, y);
         }
-      } else if (cluster.labelAlign === "left") {
-        // Label to the left
+      } else if (align === "left") {
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         for (let l = 0; l < lines.length; l++) {
@@ -221,7 +345,6 @@ export class ConstellationCanvas {
           ctx.fillText(lines[l], pos.x - radius - 16, y);
         }
       } else {
-        // Label below (center-aligned)
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         for (let l = 0; l < lines.length; l++) {
@@ -229,7 +352,7 @@ export class ConstellationCanvas {
         }
       }
 
-      // Draw child skills if this cluster is expanded
+      // Draw child skills if this cluster is the bottom (expanded) one
       if (isExpanded && this.expandProgress > 0) {
         this.drawSkills(cluster, pos, radius);
       }
@@ -238,64 +361,76 @@ export class ConstellationCanvas {
     ctx.globalAlpha = 1;
   }
 
+  /**
+   * Draw a wavy/squiggly red circle — the brand's typo signature.
+   */
+  drawSquigglyCircle(cx, cy, radius, elapsed, alpha) {
+    const { ctx } = this;
+    const waveFreq = 12; // number of waves around the circle
+    const amplitude = 1.2; // wave height in pixels
+    const steps = 120; // smoothness
+
+    ctx.beginPath();
+    for (let s = 0; s <= steps; s++) {
+      const angle = (s / steps) * Math.PI * 2;
+      const wave = Math.sin(angle * waveFreq + elapsed * 3) * amplitude;
+      const r = radius + wave;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (s === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = this.colors.squiggly;
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  getLabelAlign(pos) {
+    const cx = (this.width + NAV_OFFSET) / 2;
+    const cy = this.height * 0.38;
+
+    if (pos.y > cy + this.height * 0.12) {
+      return "bottom";
+    }
+    return pos.x < cx ? "left" : "right";
+  }
+
   drawSkills(cluster, pos, nodeRadius) {
     const { ctx } = this;
     const skills = this.skillsMap.get(cluster.id);
     const ep = this.expandProgress;
-    const lineHeight = 20;
-    const gap = 12;
+    const lineHeight = 24;
+    const gap = 16;
 
-    ctx.font = `11px ${this.colors.font}`;
+    const labelLines = cluster.label.split("\n").length;
+    const labelOffset = nodeRadius + 16 + labelLines * 18 + gap;
 
     for (let i = 0; i < skills.length; i++) {
-      // Stagger fade-in: each skill fades in slightly after the previous
-      const stagger = i * 0.08;
+      const stagger = i * 0.1;
       const skillAlpha = Math.max(0, Math.min(1, (ep - stagger) * 3));
       if (skillAlpha <= 0) continue;
 
-      const skill = skills[i];
-      // Mark shared skills with a different color
-      const isShared = skill.clusters.length > 1;
+      ctx.fillStyle = this.colors.textSecondary;
+      ctx.globalAlpha = skillAlpha * 0.9;
+      ctx.font = `12px ${this.colors.font}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
 
-      ctx.fillStyle = isShared
-        ? this.colors.textTertiary
-        : this.colors.textSecondary;
-      ctx.globalAlpha = skillAlpha * 0.85;
-
-      if (cluster.labelAlign === "right") {
-        // Skills listed to the right, below the label
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        const x = pos.x + nodeRadius + 16;
-        const y = pos.y + 30 + i * lineHeight;
-        ctx.fillText(skill.label, x, y);
-      } else if (cluster.labelAlign === "left") {
-        // Skills listed to the left, below the label
-        ctx.textAlign = "right";
-        ctx.textBaseline = "middle";
-        const x = pos.x - nodeRadius - 16;
-        const y = pos.y + 30 + i * lineHeight;
-        ctx.fillText(skill.label, x, y);
-      } else {
-        // Skills listed below the label
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        const labelLines = cluster.label.split("\n").length;
-        const labelOffset = nodeRadius + 16 + labelLines * 18 + gap;
-        const y = pos.y + labelOffset + i * lineHeight;
-        ctx.fillText(skill.label, pos.x, y);
-      }
+      const y = pos.y + labelOffset + i * lineHeight;
+      ctx.fillText(skills[i], pos.x, y);
     }
   }
 
   hitTestCluster(px, py) {
     const hitRadius = this.isTouch ? 40 : 30;
-    for (const cluster of CLUSTERS) {
-      const pos = this.getClusterPos(cluster);
+    for (let i = 0; i < CLUSTERS.length; i++) {
+      const pos = this.getClusterPos(i);
       const dx = px - pos.x;
       const dy = py - pos.y;
       if (Math.sqrt(dx * dx + dy * dy) < hitRadius) {
-        return cluster.id;
+        return { id: CLUSTERS[i].id, index: i };
       }
     }
     return null;
@@ -309,21 +444,30 @@ export class ConstellationCanvas {
   onPointerMove(e) {
     const { x, y } = this.getCanvasCoords(e);
     const hit = this.hitTestCluster(x, y);
-    this.hoveredCluster = hit;
-    this.canvas.style.cursor = hit ? "pointer" : "default";
-  }
-
-  onPointerDown(e) {
-    const { x, y } = this.getCanvasCoords(e);
-    const hit = this.hitTestCluster(x, y);
 
     if (hit) {
-      // Toggle: click same cluster to collapse, different to switch
-      this.expandedCluster = this.expandedCluster === hit ? null : hit;
+      this.hoveredCluster = hit.id;
+      this.isHovering = true;
+      this.canvas.style.cursor = "pointer";
+
+      // If hovering a node that isn't at the bottom, rotate it there
+      if (hit.id !== this.bottomCluster) {
+        this.targetAngle = this.getTargetAngleForBottom(hit.index);
+        this.isSettled = false;
+      }
     } else {
-      // Click background to collapse
-      this.expandedCluster = null;
+      this.hoveredCluster = null;
+      this.isHovering = false;
+      this.canvas.style.cursor = "default";
     }
+  }
+
+  onPointerLeave() {
+    this.hoveredCluster = null;
+    this.isHovering = false;
+    this.canvas.style.cursor = "default";
+    // Resume auto-rotation after a pause
+    this.pauseTimer = PAUSE_DURATION;
   }
 
   activate() {
@@ -336,7 +480,7 @@ export class ConstellationCanvas {
     this.stop();
     window.removeEventListener("resize", this.boundResize);
     this.canvas.removeEventListener("pointermove", this.boundPointerMove);
-    this.canvas.removeEventListener("pointerdown", this.boundPointerDown);
+    this.canvas.removeEventListener("pointerleave", this.boundPointerLeave);
     this.observer?.disconnect();
     this.themeObserver?.disconnect();
     this.canvas.remove();
