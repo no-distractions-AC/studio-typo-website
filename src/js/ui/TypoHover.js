@@ -84,6 +84,7 @@ export class TypoHover {
           return NodeFilter.FILTER_REJECT;
         if (parent.closest?.("#typo-rotating-letter"))
           return NodeFilter.FILTER_REJECT;
+        if (parent.closest?.("svg")) return NodeFilter.FILTER_REJECT;
         if (parent.closest?.(".work-showcase-counter"))
           return NodeFilter.FILTER_REJECT;
         // Only process nodes with actual visible characters

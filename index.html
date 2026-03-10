@@ -254,27 +254,80 @@
       <section id="section-services" class="content-section">
         <div class="section-inner-wide">
           <h2 class="section-title">About Us</h2>
-          <div class="service-grid">
-            <div class="service-item">
-              <h3>Web Development</h3>
-              <p>
-                Crafting performant, accessible websites that delight users and
-                drive results.
-              </p>
-            </div>
-            <div class="service-item">
-              <h3>Mobile Apps</h3>
-              <p>Native and cross-platform experiences built with precision.</p>
-            </div>
-            <div class="service-item">
-              <h3>Design Systems</h3>
-              <p>Scalable design foundations that grow with your product.</p>
-            </div>
-            <div class="service-item">
-              <h3>Consulting</h3>
-              <p>Strategic guidance to elevate your digital presence.</p>
-            </div>
-          </div>
+          <svg
+            class="venn-diagram"
+            viewBox="0 0 600 580"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Creative Depth (top-left) -->
+            <g class="venn-group">
+              <circle class="venn-circle" cx="210" cy="210" r="175" />
+              <text class="venn-label" x="210" y="18">Creative Depth</text>
+              <text class="venn-skill" x="120" y="120">Generative Art</text>
+              <text class="venn-skill" x="120" y="140">
+                Interactive Installations
+              </text>
+            </g>
+
+            <!-- Engineering Strength (top-right) -->
+            <g class="venn-group">
+              <circle class="venn-circle" cx="390" cy="210" r="175" />
+              <text class="venn-label" x="390" y="18">
+                Engineering Strength
+              </text>
+              <text class="venn-skill" x="480" y="120">API Development</text>
+              <text class="venn-skill" x="480" y="140">Cloud / DevOps</text>
+              <text class="venn-skill" x="480" y="160">Data Engineering</text>
+            </g>
+
+            <!-- Building Around Your Business (bottom-center) -->
+            <g class="venn-group">
+              <circle class="venn-circle" cx="300" cy="380" r="175" />
+              <text class="venn-label" x="300" y="572">
+                Building Around Your Business
+              </text>
+              <text class="venn-skill" x="300" y="478">
+                Strategy &amp; Consulting
+              </text>
+              <text class="venn-skill" x="300" y="498">
+                Growth &amp; Analytics
+              </text>
+            </g>
+
+            <!-- Creative ∩ Engineering (top-center overlap) -->
+            <g class="venn-group">
+              <circle class="venn-hit" cx="300" cy="185" r="60" />
+              <text class="venn-skill" x="300" y="155">
+                AI / Machine Learning
+              </text>
+              <text class="venn-skill" x="300" y="175">Game Development</text>
+              <text class="venn-skill" x="300" y="195">VR / AR</text>
+            </g>
+
+            <!-- Creative ∩ Business (bottom-left overlap) -->
+            <g class="venn-group">
+              <circle class="venn-hit" cx="220" cy="330" r="50" />
+              <text class="venn-skill" x="220" y="323">UX Research</text>
+              <text class="venn-skill" x="220" y="343">Design Systems</text>
+            </g>
+
+            <!-- Engineering ∩ Business (bottom-right overlap) -->
+            <g class="venn-group">
+              <circle class="venn-hit" cx="380" cy="330" r="50" />
+              <text class="venn-skill" x="380" y="323">Web Platforms</text>
+              <text class="venn-skill" x="380" y="343">Mobile Apps</text>
+            </g>
+
+            <!-- Center: All three -->
+            <g class="venn-group">
+              <circle class="venn-hit" cx="300" cy="265" r="45" />
+              <text class="venn-skill" x="300" y="255">
+                Software Engineering
+              </text>
+              <text class="venn-skill" x="300" y="275">Product Thinking</text>
+              <text class="venn-skill" x="300" y="295">Computer Vision</text>
+            </g>
+          </svg>
         </div>
       </section>
 
