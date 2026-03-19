@@ -188,16 +188,21 @@ export class TypoRotator {
       const el = this._getElForSegment(segment.target);
       for (let i = 0; i < segment.text.length; i++) {
         if (!this.isActive) return;
+        if (segment.target === "typo-o") {
+          this.letterEl.style.transition = "none";
+          this.letterEl.classList.add("is-typo");
+          this.letterEl.dataset.typoLetter = segment.text[i];
+        }
         el.textContent += segment.text[i];
+        if (segment.target === "typo-o") {
+          this.letterEl.offsetHeight; // force style recalc
+          this.letterEl.style.transition = "";
+        }
         this._moveCursorAfter(el);
         this._playKey(segment.text[i]);
         await this._wait(timings.typeSpeed);
       }
     }
-
-    // Mark the initial letter as a typo
-    this.letterEl.classList.add("is-typo");
-    this.letterEl.dataset.typoLetter = "a";
 
     // Brief pause after full text is typed
     if (!this.isActive) return;
