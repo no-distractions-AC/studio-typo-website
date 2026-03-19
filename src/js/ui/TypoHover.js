@@ -24,8 +24,13 @@ const SKIP_TAGS = new Set([
 export class TypoHover {
   constructor() {
     this.observer = null;
+    this.audio = null;
     this._onMouseEnter = this._onMouseEnter.bind(this);
     this._onMouseLeave = this._onMouseLeave.bind(this);
+  }
+
+  setAudioManager(audioManager) {
+    this.audio = audioManager;
   }
 
   init() {
@@ -33,10 +38,12 @@ export class TypoHover {
     const heading = document.getElementById("site-heading");
     const content = document.getElementById("content");
     const nav = document.getElementById("navigation");
+    const enterScreen = document.getElementById("enter-screen");
 
     if (heading) this.processElement(heading);
     if (content) this.processElement(content);
     if (nav) this.processElement(nav);
+    if (enterScreen) this.processElement(enterScreen);
 
     // Watch for dynamically added content
     this.observer = new MutationObserver((mutations) => {
@@ -134,6 +141,7 @@ export class TypoHover {
     el.classList.add("typo-hover-active");
     el.style.color =
       TYPO_COLORS[Math.floor(Math.random() * TYPO_COLORS.length)];
+    this.audio?.playKeyPress(el.textContent);
   }
 
   _removeTypo(el) {
@@ -142,6 +150,7 @@ export class TypoHover {
     el.classList.remove("typo-hover-active");
     el.style.color = "";
     delete el.dataset.original;
+    this.audio?.playKeyRelease(el.textContent);
   }
 
   _getNeighbors(el, count) {

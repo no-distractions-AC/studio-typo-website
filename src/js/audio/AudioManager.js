@@ -235,7 +235,7 @@ export class AudioManager {
 
       this.playKeyPress();
 
-      const nextDelay = 100 + Math.random() * 150;
+      const nextDelay = 800 + Math.random() * 2000;
       this.typingLoopTimeout = setTimeout(scheduleNextKey, nextDelay);
     };
 
