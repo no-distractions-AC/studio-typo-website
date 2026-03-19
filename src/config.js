@@ -69,7 +69,7 @@ export const CONFIG = {
   // Audio settings
   audio: {
     masterVolume: 0.7,
-    loopVolume: 0.5,
+    loopVolume: 0.15,
     keyPressVolume: 0.6,
     fadeInDuration: 1000,
     fadeOutDuration: 300,

@@ -246,6 +246,7 @@ export class App {
     // Initialize global typo hover effect
     this.typoHover = new TypoHover();
     this.typoHover.init();
+    this.typoHover.setAudioManager(this.audioManager);
 
     // Initialize timing tuning panel (Shift+T to toggle)
     this.timingPanel = new TimingPanel({
