@@ -61,6 +61,40 @@ body.scrollable {
   transition: width var(--duration-normal) var(--ease-out);
 }
 
+/* Enter screen */
+.enter-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  z-index: var(--z-loading);
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.enter-button {
+  background: none;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--text-lg);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: var(--space-3) var(--space-8);
+  cursor: pointer;
+  position: relative;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.enter-button:hover {
+  border-color: var(--text-primary);
+  transform: scale(1.05);
+}
+
 /* Minimal Navigation */
 .nav-minimal {
   position: fixed;

@@ -44,7 +44,7 @@ export const STATES = {
 // Valid state transitions
 const VALID_TRANSITIONS = {
   [STATES.LOADING]: [STATES.READY, STATES.MAIN],
-  [STATES.READY]: [STATES.INTRO],
+  [STATES.READY]: [STATES.INTRO, STATES.MAIN],
   [STATES.INTRO]: [STATES.MAIN],
 };
 
@@ -83,6 +83,8 @@ export class App {
     this.loadingEl = null;
     this.hintEl = null;
     this.progressBar = null;
+    this.enterScreenEl = null;
+    this.enterButtonEl = null;
 
     // Loading state
     this.loadProgress = 0;
@@ -96,6 +98,8 @@ export class App {
     this.loadingEl = document.getElementById("loading");
     this.hintEl = document.getElementById("hint");
     this.progressBar = document.getElementById("loading-progress-bar");
+    this.enterScreenEl = document.getElementById("enter-screen");
+    this.enterButtonEl = document.getElementById("enter-button");
 
     // Check WebGL support
     if (!supportsWebGL()) {
@@ -129,9 +133,9 @@ export class App {
 
       this.updateProgress(100);
 
-      // Jump directly to MAIN state (skip intro)
+      // Show enter screen (captures user gesture for audio)
       await this.waitForProgress();
-      this.setState(STATES.MAIN);
+      this.setState(STATES.READY);
 
       // Track performance
       this.trackLoadPerformance();
@@ -380,9 +384,18 @@ export class App {
   onStateChange(newState) {
     switch (newState) {
       case STATES.READY:
-        // Hide loading, show hint
+        // Hide loading, show enter screen
         this.loadingEl?.classList.add("hidden");
-        this.hintEl?.classList.remove("hidden");
+        this.enterScreenEl?.classList.remove("hidden");
+        this.enterButtonEl?.addEventListener(
+          "click",
+          async () => {
+            await this.audioManager.init();
+            this.enterScreenEl?.classList.add("hidden");
+            this.setState(STATES.MAIN);
+          },
+          { once: true },
+        );
         break;
 
       case STATES.INTRO:

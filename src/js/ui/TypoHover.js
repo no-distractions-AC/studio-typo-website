@@ -33,10 +33,12 @@ export class TypoHover {
     const heading = document.getElementById("site-heading");
     const content = document.getElementById("content");
     const nav = document.getElementById("navigation");
+    const enterScreen = document.getElementById("enter-screen");
 
     if (heading) this.processElement(heading);
     if (content) this.processElement(content);
     if (nav) this.processElement(nav);
+    if (enterScreen) this.processElement(enterScreen);
 
     // Watch for dynamically added content
     this.observer = new MutationObserver((mutations) => {
