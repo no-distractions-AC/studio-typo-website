@@ -101,7 +101,7 @@ export const PROJECTS = [
     year: "2022",
     description:
       "A short musical experience where environment and music are in sync, created for the Unreal WCP fellowship",
-    tags: ["Video Production", "Solo Project", "Unreal"],
+    tags: ["Video Production", "Solo Project", "Unreal", "Experience"],
     image: `${base}work/synesthesia.webp`,
     images: [`${base}work/synesthesia.webp`],
   },
@@ -189,21 +189,16 @@ export const PROJECTS = [
 
 export const WORK_CATEGORIES = [
   { id: "all", label: "All" },
+  { id: "ai", label: "AI", matchTags: ["AI"] },
+  { id: "products", label: "Products", matchTags: ["Product", "Solo Product"] },
   {
     id: "games",
     label: "Games",
     matchTags: ["Game", "Game Design", "Game Jam"],
   },
   {
-    id: "web",
-    label: "Web",
-    matchTags: ["Web Dev", "Web Development", "Product", "Solo Product"],
+    id: "experiences",
+    label: "Experiences",
+    matchTags: ["VR", "AR", "Museum Installation", "Experience"],
   },
-  { id: "xr", label: "XR", matchTags: ["VR", "AR"] },
-  {
-    id: "installations",
-    label: "Installations",
-    matchTags: ["Museum Installation"],
-  },
-  { id: "ai-tools", label: "AI & Tools", matchTags: ["AI", "Tool"] },
 ];
