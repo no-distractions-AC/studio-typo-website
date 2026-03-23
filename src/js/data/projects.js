@@ -7,26 +7,6 @@ const base = import.meta.env.BASE_URL;
 
 export const PROJECTS = [
   {
-    id: "metrics",
-    title: "Metrics",
-    year: "2023",
-    description:
-      "A platform to measure things in your life and visualize them via a Telegram bot and web app",
-    tags: ["Product", "Web Dev", "Design", "Data Visualization"],
-    image: `${base}work/metrics.webp`,
-    images: [`${base}work/metrics.webp`],
-  },
-  {
-    id: "learn",
-    title: "Explore",
-    year: "2023",
-    description:
-      "An AI-powered node graph that helps you find gaps in your knowledge and go deep into any topic",
-    tags: ["Solo Product", "Web Dev", "Product", "AI"],
-    image: `${base}work/learn.webp`,
-    images: [`${base}work/learn.webp`],
-  },
-  {
     id: "finland-museum",
     title: "Museum Installations",
     year: "2022-2023",

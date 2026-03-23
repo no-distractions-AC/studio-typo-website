@@ -156,6 +156,24 @@ body.touch-scrolling .content-section {
     margin-top: var(--space-4);
   }
 
+  /* Experiments: terminal adjustments */
+  .exp-terminal {
+    padding: var(--space-4);
+  }
+
+  .exp-t-tags {
+    display: none;
+  }
+
+  .exp-t-dots {
+    display: none;
+  }
+
+  /* Scatter: smaller viewport */
+  .exp-scatter {
+    height: 45vh;
+  }
+
   /* Section inner full width on mobile */
   .section-inner-wide {
     max-width: 100%;
