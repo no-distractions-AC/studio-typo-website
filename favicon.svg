@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <text x="16" y="23" font-family="monospace" font-size="28" font-weight="bold" fill="#F4F4F5" text-anchor="middle">o</text>
+  <path d="M5 28 Q8 25 11 28 Q14 31 17 28 Q20 25 23 28 Q26 31 29 28" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linecap="round"/>
+</svg>

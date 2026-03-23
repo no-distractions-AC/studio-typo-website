@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0A0A0F"/>
+
+  <!-- Grid pattern background -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1A1A24" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.5"/>
+
+  <!-- TYPO Keys -->
+  <g transform="translate(400, 200)">
+    <!-- T Key -->
+    <rect x="0" y="0" width="80" height="80" rx="8" fill="#2A2A35"/>
+    <text x="40" y="52" font-family="monospace" font-size="40" font-weight="bold" fill="#F4F4F5" text-anchor="middle">T</text>
+
+    <!-- Y Key -->
+    <rect x="100" y="0" width="80" height="80" rx="8" fill="#2A2A35"/>
+    <text x="140" y="52" font-family="monospace" font-size="40" font-weight="bold" fill="#F4F4F5" text-anchor="middle">Y</text>
+
+    <!-- P Key -->
+    <rect x="0" y="100" width="80" height="80" rx="8" fill="#2A2A35"/>
+    <text x="40" y="152" font-family="monospace" font-size="40" font-weight="bold" fill="#F4F4F5" text-anchor="middle">P</text>
+
+    <!-- O Key (accent) -->
+    <rect x="100" y="100" width="80" height="80" rx="8" fill="#0080FE"/>
+    <text x="140" y="152" font-family="monospace" font-size="40" font-weight="bold" fill="#FFFFFF" text-anchor="middle">O</text>
+  </g>
+
+  <!-- STUDIO text -->
+  <g transform="translate(580, 240)">
+    <text x="0" y="0" font-family="monospace" font-size="24" letter-spacing="8" fill="#A1A1AA">STUDIO</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="600" y="450" font-family="monospace" font-size="20" fill="#71717A" text-anchor="middle">Premium Technology Consultancy</text>
+
+  <!-- Accent line -->
+  <rect x="500" y="480" width="200" height="2" fill="#0080FE"/>
+</svg>

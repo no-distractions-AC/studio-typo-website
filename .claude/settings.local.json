@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(magick:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(curl:*)",
+      "Bash(npx vite:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(grep:*)",
+      "Bash(sips:*)",
+      "Bash(pkill:*)",
+      "Bash(open /Users/charutak/Documents/Work/Github/studio-typo-website/public/favicon.svg)"
+    ]
+  }
+}

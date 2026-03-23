@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASCII Art Trial | Studio Typo</title>
+    <script type="module" crossorigin src="/assets/trial-B9W4bnu-.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-YP0FEG5d.js">
+    <link rel="modulepreload" crossorigin href="/assets/ascii-density-BeomfCI8.js">
+    <link rel="stylesheet" crossorigin href="/assets/ascii-density-C6AmPqwg.css">
+    <link rel="stylesheet" crossorigin href="/assets/trial-BUpiOsPV.css">
+  </head>
+  <body>
+    <main class="trial-page">
+      <header class="trial-header">
+        <a href="/" class="back-link">&larr; Back to Studio Typo</a>
+        <h1>ASCII Art Trial</h1>
+        <p>Upload your image and see it transformed with ASCII effects</p>
+      </header>
+
+      <div class="trial-layout">
+        <!-- Left: Upload zone -->
+        <div class="trial-sidebar">
+          <div class="trial-upload" id="trial-upload">
+            <input type="file" accept="image/*" id="trial-file-input" hidden />
+            <div class="upload-prompt" id="upload-prompt">
+              <div class="upload-icon">+</div>
+              <span>Drop image here</span>
+              <span class="upload-sub">or click to upload</span>
+            </div>
+            <img id="trial-preview-img" class="hidden" alt="Preview" />
+          </div>
+
+          <!-- Settings -->
+          <div class="trial-settings">
+            <div class="setting-group">
+              <label for="trial-cols">Columns</label>
+              <div class="setting-row">
+                <input
+                  type="range"
+                  id="trial-cols"
+                  min="60"
+                  max="200"
+                  value="120"
+                />
+                <span id="trial-cols-value">120</span>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <label for="trial-ramp">Character Ramp</label>
+              <select id="trial-ramp">
+                <option value="simple">Simple (10 chars)</option>
+                <option value="full">Full (70 chars)</option>
+                <option value="photo" selected>Photo (95 chars)</option>
+                <option value="block">Block (5 chars)</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+
+            <div
+              class="setting-group"
+              id="custom-ramp-group"
+              style="display: none"
+            >
+              <label for="trial-custom-ramp">Custom Characters</label>
+              <input
+                type="text"
+                id="trial-custom-ramp"
+                placeholder="e.g. STUDIOTYPO"
+                value=""
+                class="custom-ramp-input"
+              />
+              <span class="setting-hint"
+                >Light → Dark (start with space for white)</span
+              >
+            </div>
+
+            <div
+              class="setting-group setting-toggle"
+              id="weave-text-group"
+              style="display: none"
+            >
+              <label for="trial-weave">Weave Text</label>
+              <input type="checkbox" id="trial-weave" checked />
+              <span class="setting-hint"
+                >Spell out text in the image pattern</span
+              >
+            </div>
+
+            <div class="setting-group">
+              <label for="trial-gamma">Gamma</label>
+              <div class="setting-row">
+                <input
+                  type="range"
+                  id="trial-gamma"
+                  min="1.0"
+                  max="3.0"
+                  step="0.1"
+                  value="1.8"
+                />
+                <span id="trial-gamma-value">1.8</span>
+              </div>
+            </div>
+
+            <div class="setting-group setting-toggle">
+              <label for="trial-color">Colored ASCII</label>
+              <input type="checkbox" id="trial-color" checked />
+            </div>
+
+            <div
+              class="setting-group"
+              id="typewriter-speed-group"
+              style="display: none"
+            >
+              <label for="trial-speed">Typewriter Speed</label>
+              <div class="setting-row">
+                <input
+                  type="range"
+                  id="trial-speed"
+                  min="0.5"
+                  max="500"
+                  step="0.5"
+                  value="1"
+                />
+                <span id="trial-speed-value">1x</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Preview -->
+        <div class="trial-main">
+          <!-- Effect selector -->
+          <div class="trial-effects" id="trial-effects">
+            <button data-effect="static" class="active">Static</button>
+            <button data-effect="matrix">Matrix</button>
+            <button data-effect="textmatrix">Text Matrix</button>
+            <button data-effect="typewriter">Typewriter</button>
+            <button data-effect="glitch">Glitch</button>
+            <button data-effect="particle">Particle</button>
+          </div>
+
+          <!-- ASCII preview -->
+          <div class="trial-preview" id="trial-preview">
+            <div class="preview-placeholder">
+              <span>Upload an image to see ASCII art</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </body>
+</html>

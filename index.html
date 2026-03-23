@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Studio Typo - Premium Technology Consultancy. We build exceptional digital experiences that drive business growth."
+    />
+
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Load Space Mono font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Critical CSS (inline for fast first paint) -->
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-family: "Space Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        background: #ffffff;
+        color: #0f1114;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: hidden;
+      }
+      #canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        z-index: 100;
+        gap: 1rem;
+      }
+      .loading-text {
+        font-size: 0.875rem;
+        color: #555555;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .loading-progress {
+        width: 120px;
+        height: 2px;
+        background: #cccccc;
+        border-radius: 9999px;
+        overflow: hidden;
+      }
+      .loading-progress-bar {
+        height: 100%;
+        background: #0f1114;
+        width: 0%;
+        transition: width 0.3s ease-out;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .skip-link {
+        position: absolute;
+        top: -100%;
+        left: 1rem;
+        padding: 0.5rem 1rem;
+        background: #000000;
+        color: #ffffff;
+        border-radius: 4px;
+        z-index: 9999;
+      }
+      .skip-link:focus {
+        top: 1rem;
+      }
+    </style>
+
+    <title>Studio Typo</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Studio Typo" />
+    <meta
+      property="og:description"
+      content="Premium Technology Consultancy - We build exceptional digital experiences."
+    />
+    <meta property="og:image" content="https://studiotypo.xyz/og-image.png" />
+    <meta property="og:url" content="https://studiotypo.xyz/" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Studio Typo" />
+    <meta
+      name="twitter:description"
+      content="Premium Technology Consultancy - We build exceptional digital experiences."
+    />
+
+    <!-- Mixpanel SDK (load async) -->
+    <script>
+      (function (c, a) {
+        if (!a.__SV) {
+          var b = window;
+          try {
+            var d,
+              m,
+              j,
+              k = b.location,
+              f = k.hash;
+            d = function (a, b) {
+              return (m = a.match(RegExp(b + "=([^&]*)"))) ? m[1] : null;
+            };
+            f &&
+              d(f, "state") &&
+              ((j = JSON.parse(decodeURIComponent(d(f, "state")))),
+              "mpeditor" === j.action &&
+                (b.sessionStorage.setItem("_mpcehash", f),
+                history.replaceState(
+                  j.desiredHash || "",
+                  c.title,
+                  k.pathname + k.search,
+                )));
+          } catch (n) {}
+          var l, h;
+          window.mixpanel = a;
+          a._i = [];
+          a.init = function (b, d, g) {
+            function c(b, i) {
+              var a = i.split(".");
+              2 == a.length && ((b = b[a[0]]), (i = a[1]));
+              b[i] = function () {
+                b.push([i].concat(Array.prototype.slice.call(arguments, 0)));
+              };
+            }
+            var e = a;
+            "undefined" !== typeof g ? (e = a[g] = []) : (g = "mixpanel");
+            e.people = e.people || [];
+            e.toString = function (b) {
+              var a = "mixpanel";
+              "mixpanel" !== g && (a += "." + g);
+              b || (a += " (stub)");
+              return a;
+            };
+            e.people.toString = function () {
+              return e.toString(1) + ".people (stub)";
+            };
+            l =
+              "disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(
+                " ",
+              );
+            for (h = 0; h < l.length; h++) c(e, l[h]);
+            var f = "set set_once union unset remove delete".split(" ");
+            e.get_group = function () {
+              function a(c) {
+                b[c] = function () {
+                  call2_args = arguments;
+                  call2 = [c].concat(Array.prototype.slice.call(call2_args, 0));
+                  e.push([d, call2]);
+                };
+              }
+              for (
+                var b = {},
+                  d = ["get_group"].concat(
+                    Array.prototype.slice.call(arguments, 0),
+                  ),
+                  c = 0;
+                c < f.length;
+                c++
+              )
+                a(f[c]);
+              return b;
+            };
+            a._i.push([b, d, g]);
+          };
+          a.__SV = 1.2;
+          ((b = c.createElement("script")),
+            (b.type = "text/javascript"),
+            (b.async = !0),
+            (b.src = "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"),
+            (d = c.getElementsByTagName("script")[0]),
+            d.parentNode.insertBefore(b, d));
+        }
+      })(document, window.mixpanel || []);
+    </script>
+    <script type="module" crossorigin src="/assets/main-Cl6kfKnp.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-YP0FEG5d.js">
+    <link rel="modulepreload" crossorigin href="/assets/keyboard-Vej-47Zp.js">
+    <link rel="stylesheet" crossorigin href="/assets/main-ChIJ7f7x.css">
+  </head>
+  <body>
+    <!-- Skip link for accessibility -->
+    <a href="#content" class="skip-link">Skip to content</a>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+      <span class="loading-text">Loading</span>
+      <div class="loading-progress">
+        <div id="loading-progress-bar" class="loading-progress-bar"></div>
+      </div>
+    </div>
+
+    <!-- Enter Screen (shown after loading, captures user gesture for audio) -->
+    <div id="enter-screen" class="enter-screen hidden">
+      <button id="enter-button" class="enter-button">Enter</button>
+    </div>
+
+    <!-- 3D Canvas -->
+    <canvas id="canvas" aria-label="Interactive 3D keyboard scene"></canvas>
+
+    <!-- Site Heading (animates to top-left on nav click) -->
+    <header id="site-heading" class="site-heading">
+      <h1 class="heading-brand">
+        <span class="heading-brand-placeholder" aria-hidden="true"
+          >Studio.Typo</span
+        ><span class="heading-brand-typed"
+          ><span class="heading-studio"></span><span class="heading-dot"></span
+          ><span class="heading-typo"
+            ><span class="heading-typo-text"></span
+            ><span
+              class="heading-typo-o"
+              id="typo-rotating-letter"
+            ></span></span
+        ></span>
+      </h1>
+      <span id="section-label" class="section-label"></span>
+    </header>
+
+    <!-- Scroll Indicator (hero state) -->
+    <div id="scroll-indicator" class="scroll-indicator">
+      <svg width="32" height="48" viewBox="0 0 16 24" fill="none">
+        <path
+          d="M8 4L8 20M2 14L8 20L14 14"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+
+    <!-- Content Container -->
+    <main id="content" class="content-container">
+      <!-- Hero Spacer (gives the 3D canvas a full viewport) -->
+      <div class="hero-spacer" id="hero-spacer"></div>
+
+      <!-- About Us Section -->
+      <section id="section-services" class="content-section">
+        <div class="section-inner-wide">
+          <div
+            id="constellation-container"
+            class="constellation-container"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Work Section (built dynamically by WorkSection.js) -->
+      <section id="section-work" class="content-section">
+        <div class="section-inner-wide">
+          <!-- Work scroll layout is built dynamically by WorkSection.js -->
+        </div>
+      </section>
+
+      <!-- Experiments Section -->
+      <section id="section-experiments" class="content-section">
+        <div class="section-inner-wide">
+          <p class="experiments-lead">
+            Image effects lab — 22 interactive WebGL experiments exploring
+            typography, tile physics, masking, and fusion techniques.
+          </p>
+          <a href="effects-trial.html" class="experiments-cta"
+            >Explore the Lab &rarr;</a
+          >
+        </div>
+      </section>
+
+      <!-- Who Are We Section -->
+      <section id="section-about" class="content-section">
+        <div class="section-inner-wide">
+          <p class="about-lead">
+            We are a boutique technology consultancy obsessed with craft.
+          </p>
+          <!-- Team grid is built dynamically by TeamSection.js -->
+        </div>
+      </section>
+
+      <!-- Contact Us Section -->
+      <section id="section-contact" class="content-section">
+        <div class="section-inner-wide">
+          <div id="typing-speed" class="typing-speed" aria-live="polite"></div>
+          <p class="contact-lead contact-reactive">
+            Let's build something remarkable together.
+          </p>
+
+          <form id="contact-form" class="contact-form" novalidate>
+            <div class="form-group">
+              <label for="contact-name" class="form-label contact-reactive"
+                >Name</label
+              >
+              <input
+                type="text"
+                id="contact-name"
+                name="name"
+                class="form-input"
+                placeholder="Your name"
+                required
+                autocomplete="name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="contact-email" class="form-label contact-reactive"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="contact-email"
+                name="email"
+                class="form-input"
+                placeholder="you@example.com"
+                required
+                autocomplete="email"
+              />
+            </div>
+            <div class="form-group">
+              <label for="contact-message" class="form-label contact-reactive"
+                >Message</label
+              >
+              <div class="textarea-wrapper" id="textarea-wrapper">
+                <div
+                  id="contact-message-mirror"
+                  class="form-textarea-mirror"
+                  aria-hidden="true"
+                ></div>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  class="form-textarea"
+                  placeholder="Tell us about your project..."
+                  rows="6"
+                  required
+                  spellcheck="false"
+                ></textarea>
+              </div>
+            </div>
+            <button type="submit" class="form-submit contact-reactive" disabled>
+              <span class="submit-text">Send Message</span>
+              <span class="submit-sending hidden">Sending...</span>
+              <span class="submit-sent hidden">Sent!</span>
+            </button>
+          </form>
+
+          <div class="contact-links contact-reactive">
+            <a href="mailto:hello@studiotypo.xyz" class="contact-link"
+              >hello@studiotypo.xyz</a
+            >
+            <a href="#" class="contact-link">Twitter</a>
+            <a href="#" class="contact-link">LinkedIn</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Navigation - Minimal (initially hidden) -->
+    <nav
+      id="navigation"
+      class="nav-minimal hidden"
+      aria-label="Main navigation"
+    >
+      <a href="#" class="nav-link" data-section="services">About Us</a>
+      <a href="#" class="nav-link" data-section="work">Work</a>
+      <a href="#" class="nav-link" data-section="experiments">Experiments</a>
+      <a href="#" class="nav-link" data-section="about">Who Are We</a>
+      <a href="#" class="nav-link" data-section="contact">Contact Us</a>
+    </nav>
+
+    <!-- Toggle controls (bottom-right) -->
+    <div id="controls" class="controls-fixed hidden">
+      <button
+        id="theme-toggle"
+        class="toggle-btn theme-toggle"
+        aria-label="Toggle theme"
+        aria-pressed="false"
+        title="Toggle dark/light theme"
+      ></button>
+      <button
+        id="sound-toggle"
+        class="toggle-btn sound-toggle"
+        aria-label="Toggle sound"
+        aria-pressed="true"
+        title="Toggle sound effects"
+      ></button>
+    </div>
+
+    <!-- Interaction Hint (READY state) -->
+    <div id="hint" class="hint hidden" aria-live="polite">
+      Click a key or type TYPO
+    </div>
+
+    <!-- Main Script -->
+  </body>
+</html>
