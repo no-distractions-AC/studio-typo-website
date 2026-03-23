@@ -3,6 +3,8 @@
  * with a red wavy underline, extending the brand's typo concept site-wide.
  */
 
+import { isTouchDevice } from "../utils/device.js";
+
 const TYPO_COLORS = ["#ff3b30", "#2dd4bf", "#a78bfa", "#34d399"];
 const RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const SKIP_TAGS = new Set([
@@ -34,6 +36,10 @@ export class TypoHover {
   }
 
   init() {
+    // Hover effect not applicable on touch devices; also avoids wrapping
+    // every character in a <span> which is a significant DOM overhead
+    if (isTouchDevice()) return;
+
     // Process existing content
     const heading = document.getElementById("site-heading");
     const content = document.getElementById("content");

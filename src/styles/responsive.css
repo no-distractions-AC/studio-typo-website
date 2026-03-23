@@ -3,6 +3,16 @@
  * Mobile-first approach with breakpoints
  */
 
+/* Touch scroll-snap (applied via JS on touch devices) */
+body.touch-scrolling {
+  scroll-snap-type: y proximity;
+}
+
+body.touch-scrolling .hero-spacer,
+body.touch-scrolling .content-section {
+  scroll-snap-align: start;
+}
+
 /* Mobile: < 768px */
 @media (max-width: 767px) {
   .content-container {
@@ -10,12 +20,29 @@
   }
 
   .content-section {
-    padding: var(--space-8, 2rem) 0;
+    padding: var(--space-12) 0;
   }
 
-  /* Minimal nav adjustments for mobile */
+  /* Bottom nav bar on mobile */
   .nav-minimal {
-    left: 40px;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 0;
+    padding: 12px 0;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .nav-minimal.visible {
+    transform: none;
   }
 
   .nav-section {
@@ -27,12 +54,24 @@
   }
 
   .nav-link {
-    font-size: var(--text-xs);
+    font-size: 0.6rem;
+    text-align: center;
+    letter-spacing: 0.02em;
   }
 
-  /* Controls adjustments */
+  .nav-link.active {
+    font-size: 0.65rem;
+  }
+
+  .nav-link.active::after {
+    bottom: -4px;
+    height: 6px;
+    background-size: 8px 6px;
+  }
+
+  /* Controls above bottom nav */
   .controls-fixed {
-    bottom: 16px;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
     right: 16px;
   }
 
@@ -49,6 +88,19 @@
     font-size: var(--text-xl);
   }
 
+  /* Hero heading responsive sizing */
+  .heading-brand {
+    font-size: var(--text-4xl);
+  }
+
+  .site-heading.top-left {
+    transform: translate(16px, 20px);
+  }
+
+  .site-heading.top-left .heading-brand {
+    font-size: var(--text-base);
+  }
+
   /* Hint positioning */
   .hint {
     bottom: var(--space-16);
@@ -59,21 +111,69 @@
     aspect-ratio: 1 / 1;
   }
 
-  /* Team: single column on mobile */
+  /* Team: 2 columns on mobile */
   .team-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .team-name-label {
+    font-size: var(--text-base);
   }
 
   /* Work grid: 2 columns on tablet/mobile */
   .work-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Work section: stack slides vertically */
+  .work-slide {
+    flex-direction: column;
+    height: auto;
+    gap: var(--space-4);
+  }
+
+  .work-slide-images {
+    flex: none;
+    width: 100%;
+  }
+
+  .work-slide-details {
+    flex: none;
+    width: 100%;
+  }
+
+  .work-slide-title {
+    font-size: var(--text-xl);
+  }
+
+  /* Hide outer arrows on mobile -- swipe via pointer events */
+  .work-showcase-arrow {
+    display: none;
+  }
+
+  .work-showcase-dots {
+    margin-top: var(--space-4);
+  }
+
+  /* Section inner full width on mobile */
+  .section-inner-wide {
+    max-width: 100%;
+  }
 }
 
 /* Small mobile: < 480px */
 @media (max-width: 479px) {
-  .nav-minimal {
-    left: 24px;
+  .heading-brand {
+    font-size: var(--text-3xl);
+  }
+
+  .content-container {
+    padding: 0 16px 32px;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr;
   }
 
   .nav-section {
@@ -112,6 +212,11 @@
     min-width: 44px;
     min-height: 44px;
   }
+
+  /* Always show inner image nav arrows on touch */
+  .work-slide-img-nav {
+    opacity: 0.7;
+  }
 }
 
 /* High contrast mode */
@@ -140,7 +245,8 @@
 /* Landscape mobile */
 @media (max-width: 767px) and (orientation: landscape) {
   .nav-minimal {
-    bottom: 24px;
+    padding: 8px 0;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   }
 
   #canvas {
@@ -149,14 +255,16 @@
   }
 }
 
-/* Safe area insets for notched devices */
+/* Safe area insets for notched devices (desktop only) */
 @supports (padding: env(safe-area-inset-bottom)) {
-  .controls-fixed {
-    bottom: calc(24px + env(safe-area-inset-bottom));
-    right: calc(24px + env(safe-area-inset-right));
-  }
+  @media (min-width: 768px) {
+    .controls-fixed {
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      right: calc(24px + env(safe-area-inset-right));
+    }
 
-  .nav-minimal {
-    left: calc(60px + env(safe-area-inset-left));
+    .nav-minimal {
+      left: calc(60px + env(safe-area-inset-left));
+    }
   }
 }

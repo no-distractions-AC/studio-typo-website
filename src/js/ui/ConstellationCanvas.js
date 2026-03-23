@@ -13,7 +13,11 @@ const EASE_SPEED = 5; // interpolation speed (higher = snappier)
 const SNAP_THRESHOLD = 0.01; // radians — close enough to snap
 const ORBIT_R = 0.25; // single radius for equilateral triangle
 const EXPAND_SPEED = 3;
-const NAV_OFFSET = 80; // shift center right to account for left nav
+const NAV_OFFSET_DESKTOP = 80; // shift center right to account for left nav
+const MOBILE_BREAKPOINT = 767;
+
+// Visual effects
+const PARALLAX_AMOUNT = 25;
 
 export class ConstellationCanvas {
   constructor(containerEl) {
@@ -44,6 +48,12 @@ export class ConstellationCanvas {
     this.bottomCluster = null;
     this.expandedCluster = null;
     this.expandProgress = 0;
+
+    // Mouse parallax
+    this.mouseX = 0.5;
+    this.mouseY = 0.5;
+    this.parallaxX = 0;
+    this.parallaxY = 0;
 
     // Pre-compute skill lists per cluster
     this.skillsMap = new Map();
@@ -83,6 +93,10 @@ export class ConstellationCanvas {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
+  }
+
+  getNavOffset() {
+    return this.width <= MOBILE_BREAKPOINT ? 0 : NAV_OFFSET_DESKTOP;
   }
 
   readColors() {
@@ -185,6 +199,14 @@ export class ConstellationCanvas {
       );
     }
 
+    // --- Mouse parallax ---
+    if (!this.reducedMotion) {
+      const targetPX = (this.mouseX - 0.5) * PARALLAX_AMOUNT;
+      const targetPY = (this.mouseY - 0.5) * PARALLAX_AMOUNT;
+      this.parallaxX += (targetPX - this.parallaxX) * 3 * dt;
+      this.parallaxY += (targetPY - this.parallaxY) * 3 * dt;
+    }
+
     this.draw();
     this.animId = requestAnimationFrame(() => this.tick());
   }
@@ -214,7 +236,8 @@ export class ConstellationCanvas {
   }
 
   getClusterPos(index) {
-    const cx = (this.width + NAV_OFFSET) / 2;
+    const navOffset = this.getNavOffset();
+    const cx = (this.width + navOffset) / 2;
     const cy = this.height * 0.38;
     const r = Math.min(this.width, this.height) * ORBIT_R;
 
@@ -222,8 +245,8 @@ export class ConstellationCanvas {
     const angle = baseAngle + this.rotationAngle;
 
     return {
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
+      x: cx + Math.cos(angle) * r + this.parallaxX,
+      y: cy + Math.sin(angle) * r + this.parallaxY,
     };
   }
 
@@ -231,13 +254,20 @@ export class ConstellationCanvas {
     const { ctx, width, height, elapsed } = this;
     ctx.clearRect(0, 0, width, height);
 
-    // Heading at top right
+    // Heading (with half-strength parallax for depth)
+    const navOffset = this.getNavOffset();
+    const isMobileSize = width <= MOBILE_BREAKPOINT;
     ctx.fillStyle = this.colors.textPrimary;
     ctx.globalAlpha = 0.7;
-    ctx.font = `bold 20px ${this.colors.font}`;
+    const headingSize = isMobileSize ? 14 : 20;
+    ctx.font = `bold ${headingSize}px ${this.colors.font}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("Let's Build.", (width + NAV_OFFSET) / 2, height * 0.38);
+    ctx.fillText(
+      "Let's Build.",
+      (width + navOffset) / 2 + this.parallaxX * 0.5,
+      height * 0.38 + this.parallaxY * 0.5,
+    );
     ctx.globalAlpha = 1;
 
     const positions = CLUSTERS.map((c, i) => this.getClusterPos(i));
@@ -257,6 +287,7 @@ export class ConstellationCanvas {
       [1, 2],
       [2, 0],
     ];
+
     for (const [a, b] of edges) {
       const A = positions[a];
       const B = positions[b];
@@ -321,7 +352,8 @@ export class ConstellationCanvas {
       // Cluster label — dynamic positioning based on current position
       ctx.globalAlpha = alpha * (isExpanded ? 1.0 : isHovered ? 0.9 : 0.7);
       ctx.fillStyle = this.colors.textPrimary;
-      ctx.font = `bold 18px ${this.colors.font}`;
+      const labelSize = isMobileSize ? 14 : 18;
+      ctx.font = `bold ${labelSize}px ${this.colors.font}`;
 
       const lines = cluster.label.split("\n");
       const lineHeight = 24;
@@ -388,7 +420,7 @@ export class ConstellationCanvas {
   }
 
   getLabelAlign(pos) {
-    const cx = (this.width + NAV_OFFSET) / 2;
+    const cx = (this.width + this.getNavOffset()) / 2;
     const cy = this.height * 0.38;
 
     if (pos.y > cy + this.height * 0.12) {
@@ -414,7 +446,8 @@ export class ConstellationCanvas {
 
       ctx.fillStyle = this.colors.textSecondary;
       ctx.globalAlpha = skillAlpha * 0.9;
-      ctx.font = `12px ${this.colors.font}`;
+      const skillSize = this.width <= MOBILE_BREAKPOINT ? 10 : 12;
+      ctx.font = `${skillSize}px ${this.colors.font}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
@@ -443,6 +476,13 @@ export class ConstellationCanvas {
 
   onPointerMove(e) {
     const { x, y } = this.getCanvasCoords(e);
+
+    // Track normalized mouse position for parallax
+    if (this.width > 0 && this.height > 0) {
+      this.mouseX = x / this.width;
+      this.mouseY = y / this.height;
+    }
+
     const hit = this.hitTestCluster(x, y);
 
     if (hit) {
