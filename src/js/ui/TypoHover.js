@@ -51,6 +51,24 @@ export class TypoHover {
     if (nav) this.processElement(nav);
     if (enterScreen) this.processElement(enterScreen);
 
+    // Re-process heading when it moves to top-left (after typewriter completes)
+    // At init time the heading spans are empty; TypoRotator fills them later
+    if (heading) {
+      this.headingObserver = new MutationObserver(() => {
+        if (heading.classList.contains("top-left")) {
+          delete heading.dataset.typoProcessed;
+          heading.querySelectorAll("[data-typo-processed]").forEach((el) => {
+            delete el.dataset.typoProcessed;
+          });
+          this.processElement(heading);
+        }
+      });
+      this.headingObserver.observe(heading, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+    }
+
     // Watch for dynamically added content
     this.observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
@@ -224,6 +242,7 @@ export class TypoHover {
 
   dispose() {
     this.observer?.disconnect();
+    this.headingObserver?.disconnect();
     document.body.removeEventListener("mouseenter", this._onMouseEnter, true);
     document.body.removeEventListener("mouseleave", this._onMouseLeave, true);
   }

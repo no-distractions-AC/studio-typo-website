@@ -2,6 +2,8 @@
  * ConstellationCanvas - Three cluster nodes rotating in a triangle.
  * Steps between positions with easing, pauses, and hover control.
  * The bottom node automatically reveals its skills list.
+ *
+ * Text is rendered as DOM overlays (not canvas) so TypoHover can process them.
  */
 
 import { CLUSTERS } from "../data/constellation.js";
@@ -22,6 +24,9 @@ const PARALLAX_AMOUNT = 25;
 export class ConstellationCanvas {
   constructor(containerEl) {
     this.container = containerEl;
+    this.container.style.position = "relative";
+    this.container.style.overflow = "hidden";
+
     this.canvas = document.createElement("canvas");
     this.canvas.style.cssText = "width:100%;height:100%;display:block;";
     this.container.appendChild(this.canvas);
@@ -65,6 +70,9 @@ export class ConstellationCanvas {
     this.colors = {};
     this.readColors();
 
+    // Create DOM overlays for text
+    this.createTextOverlays();
+
     // Setup
     this.resize();
 
@@ -92,6 +100,45 @@ export class ConstellationCanvas {
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
+    });
+  }
+
+  createTextOverlays() {
+    const base =
+      "position:absolute;pointer-events:none;white-space:nowrap;font-family:var(--font-mono);will-change:transform,opacity;transition:opacity 0.3s ease;";
+
+    // Center heading: "Let's Build."
+    this.headingEl = document.createElement("span");
+    this.headingEl.textContent = "Let's Build.";
+    this.headingEl.style.cssText =
+      base + "font-weight:bold;color:var(--text-primary);";
+    this.container.appendChild(this.headingEl);
+
+    // Per-cluster label + skills container
+    this.clusterEls = CLUSTERS.map((cluster) => {
+      // Label
+      const labelEl = document.createElement("span");
+      labelEl.textContent = cluster.label;
+      labelEl.style.cssText =
+        base + "font-weight:bold;color:var(--text-primary);";
+      this.container.appendChild(labelEl);
+
+      // Skills container
+      const skillsEl = document.createElement("div");
+      skillsEl.style.cssText =
+        base +
+        "display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;";
+      const skills = this.skillsMap.get(cluster.id);
+      const skillSpans = skills.map((skill) => {
+        const s = document.createElement("span");
+        s.textContent = skill;
+        s.style.cssText = "color:var(--text-secondary);";
+        skillsEl.appendChild(s);
+        return s;
+      });
+      this.container.appendChild(skillsEl);
+
+      return { labelEl, skillsEl, skillSpans };
     });
   }
 
@@ -254,21 +301,18 @@ export class ConstellationCanvas {
     const { ctx, width, height, elapsed } = this;
     ctx.clearRect(0, 0, width, height);
 
-    // Heading (with half-strength parallax for depth)
     const navOffset = this.getNavOffset();
     const isMobileSize = width <= MOBILE_BREAKPOINT;
-    ctx.fillStyle = this.colors.textPrimary;
-    ctx.globalAlpha = 0.7;
+
+    // --- Position center heading DOM overlay ---
     const headingSize = isMobileSize ? 14 : 20;
-    ctx.font = `bold ${headingSize}px ${this.colors.font}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-      "Let's Build.",
-      (width + navOffset) / 2 + this.parallaxX * 0.5,
-      height * 0.38 + this.parallaxY * 0.5,
-    );
-    ctx.globalAlpha = 1;
+    const hx = (width + navOffset) / 2 + this.parallaxX * 0.5;
+    const hy = height * 0.38 + this.parallaxY * 0.5;
+    this.headingEl.style.fontSize = headingSize + "px";
+    this.headingEl.style.opacity = "0.7";
+    this.headingEl.style.transform = `translate(-50%, -50%) translate(${hx}px, ${hy}px)`;
+    this.headingEl.style.left = "0";
+    this.headingEl.style.top = "0";
 
     const positions = CLUSTERS.map((c, i) => this.getClusterPos(i));
 
@@ -309,7 +353,6 @@ export class ConstellationCanvas {
       const pos = positions[i];
       const isHovered = this.hoveredCluster === cluster.id;
       const isExpanded = this.expandedCluster === cluster.id;
-      const isOther = this.expandedCluster && !isExpanded;
 
       // Breathing radius
       const breathe = this.reducedMotion
@@ -349,44 +392,49 @@ export class ConstellationCanvas {
       ctx.globalAlpha = alpha * 0.8;
       ctx.fill();
 
-      // Cluster label — dynamic positioning based on current position
-      ctx.globalAlpha = alpha * (isExpanded ? 1.0 : isHovered ? 0.9 : 0.7);
-      ctx.fillStyle = this.colors.textPrimary;
+      // --- Position cluster label DOM overlay ---
+      const els = this.clusterEls[i];
       const labelSize = isMobileSize ? 14 : 18;
-      ctx.font = `bold ${labelSize}px ${this.colors.font}`;
-
-      const lines = cluster.label.split("\n");
-      const lineHeight = 24;
+      const labelAlpha = isExpanded ? 1.0 : isHovered ? 0.9 : 0.7;
+      els.labelEl.style.fontSize = labelSize + "px";
+      els.labelEl.style.opacity = String(labelAlpha);
+      els.labelEl.style.left = "0";
+      els.labelEl.style.top = "0";
 
       const align = this.getLabelAlign(pos);
 
       if (align === "right") {
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        for (let l = 0; l < lines.length; l++) {
-          const y =
-            pos.y - ((lines.length - 1) * lineHeight) / 2 + l * lineHeight;
-          ctx.fillText(lines[l], pos.x + radius + 16, y);
-        }
+        els.labelEl.style.transform = `translate(0, -50%) translate(${pos.x + radius + 16}px, ${pos.y}px)`;
       } else if (align === "left") {
-        ctx.textAlign = "right";
-        ctx.textBaseline = "middle";
-        for (let l = 0; l < lines.length; l++) {
-          const y =
-            pos.y - ((lines.length - 1) * lineHeight) / 2 + l * lineHeight;
-          ctx.fillText(lines[l], pos.x - radius - 16, y);
-        }
+        els.labelEl.style.transform = `translate(-100%, -50%) translate(${pos.x - radius - 16}px, ${pos.y}px)`;
       } else {
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        for (let l = 0; l < lines.length; l++) {
-          ctx.fillText(lines[l], pos.x, pos.y + radius + 16 + l * lineHeight);
-        }
+        els.labelEl.style.transform = `translate(-50%, 0) translate(${pos.x}px, ${pos.y + radius + 16}px)`;
       }
 
-      // Draw child skills if this cluster is the bottom (expanded) one
+      // --- Position skills DOM overlay ---
       if (isExpanded && this.expandProgress > 0) {
-        this.drawSkills(cluster, pos, radius);
+        const labelLines = cluster.label.split("\n").length;
+        const labelOffset = radius + 16 + labelLines * 18 + 16;
+        const skillSize = isMobileSize ? 10 : 12;
+
+        els.skillsEl.style.fontSize = skillSize + "px";
+        els.skillsEl.style.left = "0";
+        els.skillsEl.style.top = "0";
+        els.skillsEl.style.transform = `translate(-50%, 0) translate(${pos.x}px, ${pos.y + labelOffset}px)`;
+        els.skillsEl.style.opacity = "1";
+
+        // Stagger individual skill opacity
+        const skills = this.skillsMap.get(cluster.id);
+        for (let si = 0; si < skills.length; si++) {
+          const stagger = si * 0.1;
+          const skillAlpha = Math.max(
+            0,
+            Math.min(1, (this.expandProgress - stagger) * 3),
+          );
+          els.skillSpans[si].style.opacity = String(skillAlpha * 0.9);
+        }
+      } else {
+        els.skillsEl.style.opacity = "0";
       }
     }
 
@@ -427,33 +475,6 @@ export class ConstellationCanvas {
       return "bottom";
     }
     return pos.x < cx ? "left" : "right";
-  }
-
-  drawSkills(cluster, pos, nodeRadius) {
-    const { ctx } = this;
-    const skills = this.skillsMap.get(cluster.id);
-    const ep = this.expandProgress;
-    const lineHeight = 24;
-    const gap = 16;
-
-    const labelLines = cluster.label.split("\n").length;
-    const labelOffset = nodeRadius + 16 + labelLines * 18 + gap;
-
-    for (let i = 0; i < skills.length; i++) {
-      const stagger = i * 0.1;
-      const skillAlpha = Math.max(0, Math.min(1, (ep - stagger) * 3));
-      if (skillAlpha <= 0) continue;
-
-      ctx.fillStyle = this.colors.textSecondary;
-      ctx.globalAlpha = skillAlpha * 0.9;
-      const skillSize = this.width <= MOBILE_BREAKPOINT ? 10 : 12;
-      ctx.font = `${skillSize}px ${this.colors.font}`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-
-      const y = pos.y + labelOffset + i * lineHeight;
-      ctx.fillText(skills[i], pos.x, y);
-    }
   }
 
   hitTestCluster(px, py) {
@@ -523,6 +544,12 @@ export class ConstellationCanvas {
     this.canvas.removeEventListener("pointerleave", this.boundPointerLeave);
     this.observer?.disconnect();
     this.themeObserver?.disconnect();
+    // Remove DOM overlays
+    this.headingEl?.remove();
+    for (const els of this.clusterEls) {
+      els.labelEl?.remove();
+      els.skillsEl?.remove();
+    }
     this.canvas.remove();
   }
 }

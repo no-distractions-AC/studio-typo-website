@@ -22,6 +22,7 @@ body.scrollable {
   height: 100dvh; /* iOS Safari dynamic viewport height */
   z-index: var(--z-canvas);
   transition: opacity 0.5s ease-out;
+  will-change: opacity;
 }
 
 /* Canvas pointer-events disabled when scrolled past hero (set via JS) */
@@ -217,6 +218,12 @@ body.scrollable {
   display: none !important;
 }
 
+/* Fade-out utility (opacity transition, then hide via JS) */
+.fade-out {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Error message */
 .error-message {
   text-align: center;
@@ -255,15 +262,14 @@ body.scrollable {
   flex-direction: column;
   gap: var(--space-1);
 
-  /* Starting position: centered */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* Starting position: centered (using transform only for GPU compositing) */
+  top: 0;
+  left: 0;
+  transform: translate(calc(50vw - 50%), calc(50vh - 50%));
+  will-change: transform, opacity;
 
-  /* Smooth transition */
+  /* Smooth transition (transform + opacity only — no layout recalc) */
   transition:
-    top 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-    left 0.6s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.4s ease-out;
 }
@@ -275,9 +281,7 @@ body.scrollable {
 }
 
 .site-heading.top-left {
-  top: 40px;
-  left: 60px;
-  transform: translate(0, 0);
+  transform: translate(60px, 40px);
 }
 
 .heading-brand {
@@ -442,6 +446,7 @@ body.scrollable {
   opacity: 0;
   transform: translateY(40px);
   pointer-events: none;
+  will-change: opacity, transform;
   transition:
     opacity 0.5s ease-out,
     transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -460,6 +465,7 @@ body.scrollable {
   justify-content: center;
   opacity: 0;
   transform: translateY(30px);
+  will-change: opacity, transform;
   transition:
     opacity 0.6s ease-out,
     transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -526,6 +532,11 @@ body.scrollable {
   height: 80vh;
   margin: 0 auto;
   position: relative;
+}
+
+/* Allow TypoHover spans inside constellation overlays to receive hover events */
+.constellation-container .typo-letter {
+  pointer-events: auto;
 }
 
 /* Experiments */
