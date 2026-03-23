@@ -662,6 +662,13 @@ body.scrollable {
   text-transform: uppercase;
 }
 
+.team-bio {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
 /* Work section — tag filters + marquee carousel */
 .work-tag-bar {
   display: flex;

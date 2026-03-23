@@ -42,6 +42,7 @@ export class TeamSection {
       details.innerHTML = `
         <span class="team-name-label">${member.name}</span>
         <span class="team-role">${member.role}</span>
+        <span class="team-bio">${member.bio}</span>
       `;
 
       item.appendChild(imgContainer);
