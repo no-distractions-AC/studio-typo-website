@@ -106,9 +106,23 @@ body.touch-scrolling .content-section {
     bottom: var(--space-16);
   }
 
-  /* Constellation: squarer aspect on mobile */
-  .constellation-container {
-    aspect-ratio: 1 / 1;
+  /* Services — single column on mobile */
+  .services-tagline {
+    font-size: var(--text-xl);
+  }
+
+  .services-list {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .service-pillar {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .service-pillar-icon {
+    width: 32px;
+    height: 32px;
   }
 
   /* Team: 2 columns on mobile */
@@ -188,6 +202,15 @@ body.touch-scrolling .content-section {
 
   .content-container {
     padding: 0 16px 32px;
+  }
+
+  .services-tagline {
+    font-size: var(--text-lg);
+  }
+
+  .service-pillar-icon {
+    width: 28px;
+    height: 28px;
   }
 
   .team-grid {

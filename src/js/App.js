@@ -189,10 +189,10 @@ export class App {
     // ParticleCanvas is created later in MAIN state and passed in
     this.contactSection = new ContactSection(this.audioManager, null);
 
-    // Initialize constellation (visibility-based activation via IntersectionObserver)
-    const constellationEl = document.getElementById("constellation-container");
-    if (constellationEl) {
-      this.constellation = new ConstellationCanvas(constellationEl);
+    // Initialize services grid (visibility-based activation via IntersectionObserver)
+    const servicesEl = document.getElementById("services-container");
+    if (servicesEl) {
+      this.constellation = new ConstellationCanvas(servicesEl);
     }
 
     // Initialize navigation
