@@ -14,6 +14,7 @@ import { ScrollController } from "./ui/PageTransition.js";
 import { TeamSection } from "./ui/TeamSection.js";
 import { WorkSection } from "./ui/WorkSection.js";
 import { ContactSection } from "./ui/ContactSection.js";
+import { ExperimentsSection } from "./ui/ExperimentsSection.js";
 import { ParticleCanvas } from "./ui/ParticleCanvas.js";
 import { ScrollParticleSpawner } from "./ui/ScrollParticleSpawner.js";
 import { TypoRotator, getTimings } from "./ui/TypoRotator.js";
@@ -181,6 +182,9 @@ export class App {
     // Initialize work section (lazy-initialized on first visit)
     this.workSection = new WorkSection();
 
+    // Initialize experiments section (lazy-initialized on first visit)
+    this.experimentsSection = new ExperimentsSection();
+
     // Initialize contact section (lazy-initialized on first visit)
     // ParticleCanvas is created later in MAIN state and passed in
     this.contactSection = new ContactSection(this.audioManager, null);
@@ -232,6 +236,9 @@ export class App {
         }
         if (sectionId === "work") {
           this.workSection.activate();
+        }
+        if (sectionId === "experiments") {
+          this.experimentsSection.activate();
         }
         if (sectionId === "about") {
           this.teamSection.activate();
@@ -392,7 +399,15 @@ export class App {
           "click",
           async () => {
             await this.audioManager.init();
-            this.enterScreenEl?.classList.add("hidden");
+            // Fade out enter screen, then hide after transition
+            this.enterScreenEl?.classList.add("fade-out");
+            this.enterScreenEl?.addEventListener(
+              "transitionend",
+              () => {
+                this.enterScreenEl?.classList.add("hidden");
+              },
+              { once: true },
+            );
             this.setState(STATES.MAIN);
           },
           { once: true },

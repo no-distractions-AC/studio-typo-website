@@ -4,8 +4,10 @@
  * and custom smooth scroll-snapping between sections.
  */
 
+import { isTouchDevice } from "../utils/device.js";
+
 // Configurable snap parameters
-const SNAP_DURATION = 400; // ms
+const SNAP_DURATION = 600; // ms
 const SNAP_EASING = (t) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
@@ -220,6 +222,11 @@ export class ScrollController {
     this.content.classList.add("visible");
     document.body.classList.add("scrollable");
 
+    // Enable CSS scroll-snap on touch devices
+    if (isTouchDevice()) {
+      document.body.classList.add("touch-scrolling");
+    }
+
     // Build snap targets: hero spacer + all sections
     this.snapTargets = [
       document.getElementById("hero-spacer"),
@@ -228,7 +235,11 @@ export class ScrollController {
 
     // Attach listeners
     window.addEventListener("scroll", this.handleScroll, { passive: true });
-    window.addEventListener("wheel", this.handleWheel, { passive: false });
+
+    // Only use JS snap-scroll on non-touch; touch devices get CSS scroll-snap
+    if (!isTouchDevice()) {
+      window.addEventListener("wheel", this.handleWheel, { passive: false });
+    }
     this.setupSectionObserver();
     this.setupRevealObserver();
     this.setupLazyObserver();

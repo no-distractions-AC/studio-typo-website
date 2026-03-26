@@ -22,6 +22,7 @@ body.scrollable {
   height: 100dvh; /* iOS Safari dynamic viewport height */
   z-index: var(--z-canvas);
   transition: opacity 0.5s ease-out;
+  will-change: opacity;
 }
 
 /* Canvas pointer-events disabled when scrolled past hero (set via JS) */
@@ -217,6 +218,12 @@ body.scrollable {
   display: none !important;
 }
 
+/* Fade-out utility (opacity transition, then hide via JS) */
+.fade-out {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Error message */
 .error-message {
   text-align: center;
@@ -255,15 +262,14 @@ body.scrollable {
   flex-direction: column;
   gap: var(--space-1);
 
-  /* Starting position: centered */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* Starting position: centered (using transform only for GPU compositing) */
+  top: 0;
+  left: 0;
+  transform: translate(calc(50vw - 50%), calc(50vh - 50%));
+  will-change: transform, opacity;
 
-  /* Smooth transition */
+  /* Smooth transition (transform + opacity only — no layout recalc) */
   transition:
-    top 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-    left 0.6s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.4s ease-out;
 }
@@ -275,9 +281,7 @@ body.scrollable {
 }
 
 .site-heading.top-left {
-  top: 40px;
-  left: 60px;
-  transform: translate(0, 0);
+  transform: translate(60px, 40px);
 }
 
 .heading-brand {
@@ -442,6 +446,7 @@ body.scrollable {
   opacity: 0;
   transform: translateY(40px);
   pointer-events: none;
+  will-change: opacity, transform;
   transition:
     opacity 0.5s ease-out,
     transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -460,6 +465,7 @@ body.scrollable {
   justify-content: center;
   opacity: 0;
   transform: translateY(30px);
+  will-change: opacity, transform;
   transition:
     opacity 0.6s ease-out,
     transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -520,12 +526,230 @@ body.scrollable {
   line-height: 1.6;
 }
 
-/* Constellation Diagram */
-.constellation-container {
+/* Services section — 3-column card layout */
+
+/* Root container */
+.services-grid {
   width: 100%;
-  height: 80vh;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
   position: relative;
+}
+
+/* Tagline */
+.services-tagline {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+}
+
+.services-grid.visible .services-tagline {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.services-tagline-suffix {
+  font-weight: 400;
+}
+
+/* Stacked rows — centered block */
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* Individual pillar — horizontal row */
+.service-pillar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transform: translateY(24px) scale(1);
+  transition:
+    opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-pillar:hover {
+  transform: translateY(0) scale(1.04);
+}
+
+/* Staggered entrance */
+.services-grid.visible .service-pillar {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.services-grid.visible .service-pillar:nth-child(1) {
+  transition-delay: 150ms;
+}
+.services-grid.visible .service-pillar:nth-child(2) {
+  transition-delay: 300ms;
+}
+.services-grid.visible .service-pillar:nth-child(3) {
+  transition-delay: 450ms;
+}
+
+/* Header: icon + label stacked */
+.service-pillar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* SVG line-draw icons */
+.service-pillar-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--pillar-accent, var(--text-secondary));
+  transition:
+    color 0.4s ease,
+    transform 0.4s ease;
+}
+
+.service-pillar:hover .service-pillar-icon {
+  color: var(--text-primary);
+  transform: scale(1.15);
+}
+
+/* Path draw animation — staggered per pillar + per path */
+.service-pillar-icon path.draw-active {
+  animation: line-draw 4s ease-in-out infinite;
+  animation-delay: calc(
+    var(--pillar-index, 0) * 1.3s + var(--path-index, 0) * 0.3s
+  );
+}
+
+@keyframes line-draw {
+  0% {
+    stroke-dashoffset: var(--dash-len, 100);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  40% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  60% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: calc(var(--dash-len, 100) * -1);
+    opacity: 0;
+  }
+}
+
+/* Faster on hover */
+.service-pillar:hover .service-pillar-icon path.draw-active {
+  animation-duration: 2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-pillar-icon path.draw-active {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Category label */
+.service-pillar-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.service-pillar:hover .service-pillar-label {
+  color: var(--text-primary);
+}
+
+/* Vertical accent divider */
+.service-pillar-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-primary);
+  flex-shrink: 0;
+  transition:
+    height 0.4s ease,
+    background 0.4s ease;
+}
+
+.service-pillar:hover .service-pillar-divider {
+  height: 48px;
+  background: var(--pillar-accent, var(--text-tertiary));
+}
+
+/* Skills list */
+.service-pillar-skills {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+/* Individual skill */
+.service-skill {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out,
+    color var(--duration-normal) ease;
+}
+
+.services-grid.visible .service-skill {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.service-skill:nth-child(1) {
+  transition-delay: 0ms;
+}
+.service-skill:nth-child(2) {
+  transition-delay: 60ms;
+}
+.service-skill:nth-child(3) {
+  transition-delay: 120ms;
+}
+.service-skill:nth-child(4) {
+  transition-delay: 180ms;
+}
+
+.service-pillar:hover .service-skill {
+  color: var(--text-primary);
 }
 
 /* Experiments */
@@ -548,6 +772,161 @@ body.scrollable {
 
 .experiments-cta:hover {
   opacity: 0.7;
+}
+
+/* ==========================================
+   Experiments — Terminal Mode
+   ========================================== */
+
+.experiments-container {
+  width: 100%;
+}
+
+.exp-terminal {
+  font-family: var(--font-mono);
+  padding: var(--space-6);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+}
+
+.exp-terminal-header {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-6);
+  letter-spacing: 0.03em;
+}
+
+.exp-terminal-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.exp-terminal-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+  cursor: pointer;
+}
+
+.exp-terminal-row:hover {
+  background: var(--accent-subtle, rgba(255, 255, 255, 0.05));
+}
+
+.exp-t-idx {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  width: 2ch;
+}
+
+.exp-t-name {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.exp-t-dots {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  opacity: 0.3;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.exp-t-tags {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.exp-terminal-footer {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-6);
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================
+   Experiments — Scatter / Word Cloud Mode
+   ========================================== */
+
+.exp-scatter {
+  position: relative;
+  width: 100%;
+  height: 55vh;
+  overflow: hidden;
+}
+
+.exp-scatter-word {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.exp-scatter-word.dimmed {
+  opacity: 0.15;
+}
+
+.exp-scatter-word.active {
+  color: var(--text-primary);
+  z-index: 10;
+}
+
+.exp-scatter-word.active::after {
+  content: attr(data-description);
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--text-secondary);
+  white-space: normal;
+  max-width: 280px;
+  margin-top: var(--space-1);
+  line-height: 1.5;
+}
+
+.exp-scatter-word.active::before {
+  content: attr(data-tags);
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+  order: 2;
+}
+
+/* Size variants */
+.exp-s-xs {
+  font-size: var(--text-sm);
+}
+.exp-s-sm {
+  font-size: var(--text-base);
+}
+.exp-s-md {
+  font-size: var(--text-xl);
+}
+.exp-s-lg {
+  font-size: var(--text-2xl);
+}
+.exp-s-xl {
+  font-size: var(--text-3xl);
 }
 
 /* Contact */
@@ -649,6 +1028,13 @@ body.scrollable {
   color: var(--text-secondary);
   letter-spacing: 0.03em;
   text-transform: uppercase;
+}
+
+.team-bio {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  line-height: 1.5;
 }
 
 /* Work section — tag filters + marquee carousel */

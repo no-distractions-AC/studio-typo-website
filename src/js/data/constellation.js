@@ -6,21 +6,22 @@ export const CLUSTERS = [
   {
     id: "creative",
     label: "Creativity",
-    skills: ["Game Development", "VR / AR", "Product & Design"],
+    skills: ["Games", "Immersive", "Design"],
+    accent: "#a78bfa",
+    geometry: "octahedron",
   },
   {
     id: "engineering",
     label: "Engineering",
-    skills: ["AI, LLMs & Image", "Cloud & DevOps", "Full-Stack Engineering"],
+    skills: ["AI & ML", "Infrastructure", "Full-Stack"],
+    accent: "#34d399",
+    geometry: "torus",
   },
   {
-    id: "business",
-    label: "Business",
-    skills: [
-      "Product Thinking",
-      "Strategy & Consulting",
-      "Growth & Analytics",
-      "Design Systems",
-    ],
+    id: "product",
+    label: "Product",
+    skills: ["Strategy", "Growth", "Design Systems"],
+    accent: "#2dd4bf",
+    geometry: "dodecahedron",
   },
 ];

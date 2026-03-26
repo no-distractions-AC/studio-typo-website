@@ -3,6 +3,8 @@
  * with a red wavy underline, extending the brand's typo concept site-wide.
  */
 
+import { isTouchDevice } from "../utils/device.js";
+
 const TYPO_COLORS = ["#ff3b30", "#2dd4bf", "#a78bfa", "#34d399"];
 const RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const SKIP_TAGS = new Set([
@@ -34,6 +36,10 @@ export class TypoHover {
   }
 
   init() {
+    // Hover effect not applicable on touch devices; also avoids wrapping
+    // every character in a <span> which is a significant DOM overhead
+    if (isTouchDevice()) return;
+
     // Process existing content
     const heading = document.getElementById("site-heading");
     const content = document.getElementById("content");
@@ -44,6 +50,24 @@ export class TypoHover {
     if (content) this.processElement(content);
     if (nav) this.processElement(nav);
     if (enterScreen) this.processElement(enterScreen);
+
+    // Re-process heading when it moves to top-left (after typewriter completes)
+    // At init time the heading spans are empty; TypoRotator fills them later
+    if (heading) {
+      this.headingObserver = new MutationObserver(() => {
+        if (heading.classList.contains("top-left")) {
+          delete heading.dataset.typoProcessed;
+          heading.querySelectorAll("[data-typo-processed]").forEach((el) => {
+            delete el.dataset.typoProcessed;
+          });
+          this.processElement(heading);
+        }
+      });
+      this.headingObserver.observe(heading, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+    }
 
     // Watch for dynamically added content
     this.observer = new MutationObserver((mutations) => {
@@ -218,6 +242,7 @@ export class TypoHover {
 
   dispose() {
     this.observer?.disconnect();
+    this.headingObserver?.disconnect();
     document.body.removeEventListener("mouseenter", this._onMouseEnter, true);
     document.body.removeEventListener("mouseleave", this._onMouseLeave, true);
   }
