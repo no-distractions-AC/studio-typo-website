@@ -526,17 +526,230 @@ body.scrollable {
   line-height: 1.6;
 }
 
-/* Constellation Diagram */
-.constellation-container {
+/* Services section — 3-column card layout */
+
+/* Root container */
+.services-grid {
   width: 100%;
-  height: 80vh;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
   position: relative;
 }
 
-/* Allow TypoHover spans inside constellation overlays to receive hover events */
-.constellation-container .typo-letter {
-  pointer-events: auto;
+/* Tagline */
+.services-tagline {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+}
+
+.services-grid.visible .services-tagline {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.services-tagline-suffix {
+  font-weight: 400;
+}
+
+/* Stacked rows — centered block */
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* Individual pillar — horizontal row */
+.service-pillar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transform: translateY(24px) scale(1);
+  transition:
+    opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-pillar:hover {
+  transform: translateY(0) scale(1.04);
+}
+
+/* Staggered entrance */
+.services-grid.visible .service-pillar {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.services-grid.visible .service-pillar:nth-child(1) {
+  transition-delay: 150ms;
+}
+.services-grid.visible .service-pillar:nth-child(2) {
+  transition-delay: 300ms;
+}
+.services-grid.visible .service-pillar:nth-child(3) {
+  transition-delay: 450ms;
+}
+
+/* Header: icon + label stacked */
+.service-pillar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* SVG line-draw icons */
+.service-pillar-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--pillar-accent, var(--text-secondary));
+  transition:
+    color 0.4s ease,
+    transform 0.4s ease;
+}
+
+.service-pillar:hover .service-pillar-icon {
+  color: var(--text-primary);
+  transform: scale(1.15);
+}
+
+/* Path draw animation — staggered per pillar + per path */
+.service-pillar-icon path.draw-active {
+  animation: line-draw 4s ease-in-out infinite;
+  animation-delay: calc(
+    var(--pillar-index, 0) * 1.3s + var(--path-index, 0) * 0.3s
+  );
+}
+
+@keyframes line-draw {
+  0% {
+    stroke-dashoffset: var(--dash-len, 100);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  40% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  60% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: calc(var(--dash-len, 100) * -1);
+    opacity: 0;
+  }
+}
+
+/* Faster on hover */
+.service-pillar:hover .service-pillar-icon path.draw-active {
+  animation-duration: 2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-pillar-icon path.draw-active {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Category label */
+.service-pillar-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.service-pillar:hover .service-pillar-label {
+  color: var(--text-primary);
+}
+
+/* Vertical accent divider */
+.service-pillar-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-primary);
+  flex-shrink: 0;
+  transition:
+    height 0.4s ease,
+    background 0.4s ease;
+}
+
+.service-pillar:hover .service-pillar-divider {
+  height: 48px;
+  background: var(--pillar-accent, var(--text-tertiary));
+}
+
+/* Skills list */
+.service-pillar-skills {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+/* Individual skill */
+.service-skill {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out,
+    color var(--duration-normal) ease;
+}
+
+.services-grid.visible .service-skill {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.service-skill:nth-child(1) {
+  transition-delay: 0ms;
+}
+.service-skill:nth-child(2) {
+  transition-delay: 60ms;
+}
+.service-skill:nth-child(3) {
+  transition-delay: 120ms;
+}
+.service-skill:nth-child(4) {
+  transition-delay: 180ms;
+}
+
+.service-pillar:hover .service-skill {
+  color: var(--text-primary);
 }
 
 /* Experiments */
